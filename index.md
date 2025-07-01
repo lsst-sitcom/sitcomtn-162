@@ -8,7 +8,7 @@ Cell-based coadds and Metadetection are both currently in the process of being i
 
 ## Cell-Based Coadds Input
 
-At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipeline and must be generated independently. The equivalent of the pipetask command below was run on the w_2025_17 weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
+At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipeline and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
 
 ```
 pipetask run -j 4 --register-dataset-types  \
@@ -60,17 +60,23 @@ tasks:
 
 There are a few reasons why there are additional tasks on top of the cell-based coaddition task, `assembleCellCoadd`. The primary input images for the cell-based coadds are warped images using the `makeDirectWarp` task. For cell-based coadds, the `doPreWarpInterpolation` configuration needs to be set to `True` manually, as the default pipeline setting is False. This `doPreWarpInterpolation` config is used to properly propagate the mask plane to the from the warps to the cell-based coadds. The `makePsfMatchedWarp` and `assembleDeepCoadd` tasks are needed to generate artifact masks, which are required inputs for the cell-based coaddition task to run.
 
-The collections for the cell-based coadds are stored in `u/mgorsuch/a360_cell_coadd` for *r*- and *i*-bands, and `u/mgorsuch/a360_cell_coadd_g` for *g*-band (separate collections due to not running g-band initially).
+The collections for the cell-based coadds are stored in `u/mgorsuch/a360_cell_coadd` for *r*- and *i*-bands, and `u/mgorsuch/a360_cell_coadd_g` for *g*-band (separate collections due to not running *g*-band initially).
 
 Cell-based coadds are stored as patch-sized coadds, divided into 484 cell regions (22 by 22 cells). Individual cells have both inner and outer boundary boxes, which are 150 by 150 and 250 by 250 pixels, respectively.
 
 Metadetection utilizes both inner and outer boundaries of cells, and does not duplicate objects from this overlap. However, there is also overlap between patches and tracts that Metadetection does not address, and this leads to duplicate objects within the object tables. Overlap between patches within the same tract is 2 cells wide, and duplicates are removed by removing objects found in the outer ring of cells of each patch. There is also significant overlap between tracts. Patches in tract 10463 that fully overlap with tract 10464 are ignored. After removing the fully overlapping patches, there’s still a 4 cell wide overlap on one side between tract 10463 and 10464. Overlapping cells are again removed. Currently, the WCS information is not enough to remove exact duplicates based on RA and DEC. Why this is the case requires further investigation.
 
-[Plot for Input Image Distribution]
-*Caption*: These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle).
+```{figure} _static/3_band_image_distribution.png
+:name: image_dist
 
-[Plot for PSF ellipticity Distribution]
-*Caption*: PSF ellipticity distribution with one PSF realization per cell for the patches around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries. The general pattern is consistent with [PSF technote], especially in the r- and i-band. The mean ellipticities are 0.0563, 0.0689, and 0.0987 for the g, r, and i-bands, respectively.
+These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle).
+```
+
+```{figure} _static/3_band_psf_e_distribution.png
+:name: ellip_dist
+
+PSF ellipticity distribution with one PSF realization per cell for the patches around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries. The general pattern is consistent with [PSF technote], especially in the r- and i-band. The mean ellipticities are 0.0563, 0.0689, and 0.0987 for the g, r, and i-bands, respectively.
+```
 
 Note that for cell-based coadds, there is a single PSF model for each cell, realized at the center of the cell. The distribution of PSF ellipticities are seen in Fig. [...].
 
@@ -128,26 +134,45 @@ Prior to Metadetection flags (i.e. objects cut due to measurement failures), the
 Cluster member galaxies of the lensing cluster structure will not have a lensing signal (at least not from the cluster itself). Due to this, these galaxies need to be identified and removed from the lensing sample to avoid diluting the shear signal [citation?]. These lensing galaxies are primarily identified through visual inspection using color-magnitude plots across three different bands.
 
 [Plot for magnitude histograms]
-*Caption*: The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts.The red vertical lines are the current magnitude cuts at the limiting magnitude, determined by eye.
+```{figure} _static/object-magnitudes.png
+:name: obj-mags
+
+The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts.The red vertical lines are the current magnitude cuts at the limiting magnitude, determined by eye.
+```
 
 A series of color-magnitude plots with progressive cuts is used to identify the red sequence (RS) galaxies. Each cut is applied to the entire catalog, though only the non-sheared catalog is shown in the color-magnitude plots. Previous visual inspection showed that while there is some variation in  between shear type catalogs, the variation is minimal and random enough that applying the same cuts should be sufficient for this analysis.
 
 The catalog is first cut to galaxies less than 0.1 degree away from the BCG to focus on galaxies that are more likely to be cluster members. The red sequence cluster members are identified in a line of objects with relatively consistent color across a range of magnitudes, with the line being more apparent in the smaller sample of galaxies. This line of galaxies is highlighted with orange points, with the upper and lower limits shown in red. The same visual inspection is done again for the larger sample of galaxies, those within 0.5 degrees of the BCG. Within the larger sample, the objects identified within the limits of either the g-r or r-i RS galaxy limits are cut, leaving a sample of galaxies for measuring weak lensing. This sample still includes bright foreground galaxies, though these should not bias the signal as their shape distribution should be random without the lensing from the cluster. Still, bright galaxies are cut, as seen in the selection cut section.
 
-[Plot color-magnitude < 0.1 degree]
-*Caption*: color-magnitude cut to 0.1 degree
+```{figure} _static/color-magnitude-0-1.png
+:name: color-magnitude-0-1
 
-[Plot color-magnitude < 0.1 degree with highlights]
-*Caption*: color-magnitude cut to 0.1 degree, highlights
+Color-magnitude diagram cut to 0.1 degrees within the BCG.
+```
 
-[Plot color-magnitude < 0.5 degree]
-*Caption*: color-magnitude cut to 0.5 degree
+```{figure} _static/color-magnitude-0-1-orange.png
+:name: color-magnitude-0-1-orange
 
-[Plot color-magnitude < 0.5 degree with highlights]
-*Caption*: color-magnitude cut to 0.5 degree, highlights
+Color-magnitude diagram cut to 0.1 degrees within the BCG. Objects that are included within the cut are highlighted in orange.
+```
 
-[Plot color-magnitude < 0.5 degree with cuts]
-*Caption*: color-magnitude cut to 0.5 degree with cuts applied.
+```{figure} _static/color-magnitude-0-5-no-line.png
+:name: color-magnitude-0-5-no-line
+
+Color-magnitude diagram cut to 0.5 degrees within the BCG.
+```
+
+```{figure} _static/color-magnitude-0-5-orange.png
+:name: color-magnitude-0-5-orange
+
+Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are included within the cut are highlighted in orange.
+```
+
+```{figure} _static/color-magnitude-0-5-removed.png
+:name: color-magnitude-0-5-removed
+
+Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are included within the cut are removed.
+```
 
 After applying the 0.5 degree cut, but prior to removing RS objects, there are 217527 object rows. After applying the RS cuts, there are 152838, with 30532 (20%) of which are the non-sheared catalog.
 
@@ -203,15 +228,21 @@ The resulting shear profile is shown below in Fig. [main shear profile]. Each bi
 
 The error bars for all shear profiles are bootstrapped samples of each radial bin with 95% confidence levels. From smallest radial separation to largest, the number of galaxies in each bin are 63, 169, 377, 828, 2028, and 5818 galaxies.
 
-[Plot: main shear profile]
-*Caption*: The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. Both measured profiles have 1\sigma error bars.
+```{figure} _static/shear-final.png
+:name: shear-final
+
+The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. Both measured profiles have 95% confidence intervals.
+```
 
 The theoretical shear profile is produced using Cluster Lensing Mass Modeling (CLMM) [cite] code. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW [cite] halo with an estimated cluster mass of 4e14 solar masses [cite] and a concentration of 4. The source redshift distribution is based off of the DESC Science Requirements Document (SRD) [cite].
 
 To see if more galaxies were needed in the sample to better characterize R, Metadetection was additionally run on the entire Rubin SV 38 7 field. The errors on the components of R mildly improve, though little difference is seen in the shear profile.
 
-[Plot: shear profile with no calibration]
-*Caption*: Shear profile using the same data as Fig. [original shear profile], except R is calculated from all galaxies in the Rubin SV 38 7 field produced by Metadetection.
+```{figure} _static/shear-all-cal.png
+:name: shear-all-cal
+
+Shear profile using the same data as Fig. [original shear profile], except R is calculated from all galaxies in the Rubin SV 38 7 field produced by Metadetection.
+```
 
 
 |                   | Galaxies < 0.5 degrees | Galaxies in SV 38 7 |
@@ -232,8 +263,11 @@ This section contains a non-exhaustive list of notes and figures on characterizi
 
 The measured object size compared to the signal-to-noise ratio is a simple cut to differentiate stars and galaxies.
 
-[Plot: T_ratio vs SN]
-*Caption*: Left: relationship between the object size ratio and the S/N of each object prior to selection cuts, though after red sequence galaxy removal. The red line is a visual reference to see what objects are removed by the 1.1 object size ratio cut. Stars are expected to fall near an object ratio of 1, which is seen clearly for high S/N objects. Right. Distribution of objects after the object size ratio cut (and other additional cuts). The line of stars is removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties [Yamamoto].
+```{figure} _static/obj_T_vs_s2n.png
+:name: obj_T_vs_s2n
+
+Left: relationship between the object size ratio and the S/N of each object prior to selection cuts, though after red sequence galaxy removal. The red line is a visual reference to see what objects are removed by the 1.1 object size ratio cut. Stars are expected to fall near an object ratio of 1, which is seen clearly for high S/N objects. Right. Distribution of objects after the object size ratio cut (and other additional cuts). The line of stars is removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties [Yamamoto].
+```
 
 ### Angular Correlations of PSF Ellipticities
 
@@ -252,19 +286,34 @@ $$ (eqn2)
 
 The moments used for the reserve stars come from the `i_ixx`, `i_iyy`, and `i_ixy` columns from the object table. As for the model PSF, this is measured directly from the PSF model image for each cell using methods from `lsst.afw.math` and `lsst.meas.algorithms`. Angular correlations are calculated using the `TreeCorr` package, using the default “shot” variance.
 
-[Plot: PSF residuals and correlations]
-*Caption*: Top row: Residuals of the measured star PSF properties and the cell model PSFs. Note that not all cells will necessarily have a reserved star within them. Bottom row: Angular correlation between residual PSF values. The errors generated from `TreeCorr` are extremely small and blown up to show relative errors between bins.
+```{figure} _static/psf_correlations.png
+:name: psf_correlations
+
+Top row: Residuals of the measured star PSF properties and the cell model PSFs. Note that not all cells will necessarily have a reserved star within them. Bottom row: Angular correlation between residual PSF values. The errors generated from `TreeCorr` are extremely small and blown up to show relative errors between bins.
+```
 
 ### False Detections
 
 The [Yamamoto 25] paper introduces a few cuts for spurious detections. The first is an upper limit of `wmom_T` as a function of `wmom_T_err`, while the second cut is the product of `wmom_T` x `wmom_T_err`. These focus on areas around bright stars and spurious detections within cluster fields, respectively. Plots in Fig. [Junk cuts] were used to get an initial idea of where the data lied. Visual inspection of these objects showed that the majority are around bright stars, spurious detections, and small galaxies with close, undetected neighbors. Still, these cuts remove potentially viable galaxies from the sample, and don’t find every spurious detection. The values used in these cuts come from maximizing the number of spurious detections removed and minimizing the number of viable galaxies kept using visual inspection.
 
-[Plot: Junk cuts]
-*Caption*: Distribution of data points before and after cuts. The red lines indicate where the relevant junk cut removes data. The large cluster of points prior to applying all cuts in both the left plots are mostly stars removed from the star-galaxy cut, and are not present in the plots on the right.
+```{figure} _static/junk1.png
+:name: junk1
+
+Distribution of data points before and after cuts. The red lines indicate where the relevant junk cut removes data. The large cluster of points prior to applying all cuts in the left plot is mostly stars removed from the star-galaxy cut, and are not present in the plot on the right.
+```
+
+```{figure} _static/junk2.png
+:name: junk2
+
+Distribution of data points before and after cuts.
+```
 
 ### Object Distributions
 
 Plotting the distribution of objects on the sky is a simple but effective way to discover inconsistencies within the data. For example, the leftmost plot in Fig. [object distribution] shows an overdensity of objects detected that align with where patches overlap, unexpected after removing exact duplicates based on RA and DEC coordinates. This duplication is addressed, as seen in the following plots in Fig. [object distribution].
 
-[Plot: object distributions]
-*Caption*: Object distributions of the non-sheared catalog at various points during cuts. Left: Galaxy distributions prior to any cuts. There is a clear overdensity that overlaps between patches. Middle: the distribution after the red sequence galaxies have been removed. Right: the object distribution after all cuts have been applied.
+```{figure} _static/object-distribution-before-after.png
+:name: object-distribution
+
+Object distributions of the non-sheared catalog at various points during cuts. Left: Galaxy distributions prior to any cuts. There is a clear overdensity that overlaps between patches. Middle: the distribution after the red sequence galaxies have been removed. Right: the object distribution after all cuts have been applied.
+```
