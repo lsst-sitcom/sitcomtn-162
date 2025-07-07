@@ -7,14 +7,14 @@ Cell-based coadds and Metadetection are both currently in the process of being i
 
 As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog. The shear profile performs best in radial bins further away from the cluster center (beyond ~ 2 Mpc), which may be due to high occurances of blending near the cluster center.
 
-This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection in {cite}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
+This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
 ```
 
 ## Cell-Based Coadds Input
 
 At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipeline and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
 
-The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
+The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 (), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
 
 ```
 pipetask run -j 4 --register-dataset-types  \
