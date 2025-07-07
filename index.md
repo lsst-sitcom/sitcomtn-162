@@ -1,21 +1,25 @@
-# Testing the implementation of Metadetection and Cell-Based Coadds on Abell 360 ComCam data
+# Testing the implementation of Metadetection and Cell-Based Coadds on Abell 360 LSSTComCam data
 
 ```{abstract}
-The purpose of this technote is to test the technical quality of ComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential shear profile, and the cross shear profile, of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, and calibrating the shear measurements. Once a shear profile is generated, validation is the bulk of the remaining analysis.
+The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential shear profile, and the cross shear profile, of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, and calibrating the shear measurements. Once a shear profile is generated, validation is the bulk of the remaining analysis.
 
 Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is quite a bit of technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed.
+
+As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog. The shear profile performs best in radial bins further away from the cluster center (beyond ~ 2 Mpc), which may be due to high occurances of blending near the cluster center.
+
+This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection in {cite}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
 ```
 
 ## Cell-Based Coadds Input
 
 At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipeline and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
 
-The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095_temp`), focusing on images taken with ComCam.
+The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
 
 ```
 pipetask run -j 4 --register-dataset-types  \
 -b /repo/main \
--i LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
+-i ComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
 -o u/$USER/ComCam_Cells/a360 \
 -p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline.yaml \
 -d "((tract=10463 AND patch IN (30..34,40..44,50..54,60..64,70..74,80..84,90..94)) \
@@ -273,7 +277,7 @@ Left: relationship between the object size ratio and the S/N of each object prio
 
 ### Angular Correlations of PSF Ellipticities
 
-The version of cell-based coadds used here is not tested on downstream tasks, which is beyond the scope of this technote. Instead, the PSF information from reserved stars (n=212) is taken from the ComCam DRP `patch_table` using the `w_2025_17` weekly pipeline stack version; the specific collection used is `LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530`. With this in mind, this section covers some angular correlations of PSF qualities between the reserved stars and the model PSF at the center of each cell. For a more thorough treatment of the PSFs in the `Rubin_SV_38_7` field, see [PSF Technote].
+The version of cell-based coadds used here is not tested on downstream tasks, which is beyond the scope of this technote. Instead, the PSF information from reserved stars (n=212) is taken from the LSSTComCam DRP `patch_table` using the `w_2025_17` weekly pipeline stack version; the specific collection used is `LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530`. With this in mind, this section covers some angular correlations of PSF qualities between the reserved stars and the model PSF at the center of each cell. For a more thorough treatment of the PSFs in the `Rubin_SV_38_7` field, see [PSF Technote].
 
 The PSF quantities used here have the same definitions for both the reserve star PSFs and the cell-based coadd model PSFs, and both only use the i-band. These are defined with:
 
@@ -319,6 +323,14 @@ Plotting the distribution of objects on the sky is a simple but effective way to
 
 Object distributions of the non-sheared catalog at various points during cuts. Left: Galaxy distributions prior to any cuts. There is a clear overdensity that overlaps between patches. Middle: the distribution after the red sequence galaxies have been removed. Right: the object distribution after all cuts have been applied.
 ```
+
+## Final Remarks
+
+From what was able to be achieved within this technote, the combination of cell-based coadds and Metadetection have the necessary infrastructure needed to successfully run end-to end within the LSST Science Pipelines infrastructure and produce a shape catalog. With this shape catalog, a tangential shear profile of A360 was created. Radial bins beyond ~2 Mpc tend to perform the best, while the inner bins struggle to find a clear signal; this is not surprising within a cluster environment.
+
+As for technical details, it should be noted that many configuration settings are not yet available to the pipeline infrastructure through pipeline `.yaml` files. The main motivation for custom branches was to enable changes (e.g. changing `wmom` to `pgauss`) for testing purposes.
+
+There are still plenty of tasks that can done next. It might be beneficial to incorporate alternative deblending algorithms to potentially improve the performance of the shear profile within the inner radial bins near the cluster center. Additionally, running detection tasks on the cell-based coadds would be helpful for comparing objects detected in the Metadetection catalog, as well as obtain PSF measurements for reserved stars in order to do a more thorough $\rho$-statistics analysis. More technical investigations should be done to understand why object coordinates differ between patches with the same WCS information, as well as investigate the source of extremely large S/N values and lack of objects with a S/N below 10.
 
 ## References
 
