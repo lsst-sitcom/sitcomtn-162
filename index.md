@@ -1,18 +1,18 @@
 # Testing the implementation of Metadetection and Cell-Based Coadds on Abell 360 LSSTComCam data
 
 ```{abstract}
-The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential shear profile, and the cross shear profile, of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, and calibrating the shear measurements. Once a shear profile is generated, validation is the bulk of the remaining analysis.
+The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential and cross weak lensing shear profiles of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, and calibrating the shear measurements. Once a shear profile is generated, validation is the bulk of the remaining analysis.
 
-Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is quite a bit of technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed.
+Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is substantial technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed.
 
 As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog. The shear profile performs best in radial bins further away from the cluster center (beyond ~ 2 Mpc), which may be due to high occurances of blending near the cluster center.
 
-This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
+This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection and photometric redshifts in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
 ```
 
 ## Cell-Based Coadds Input
 
-At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipeline and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
+At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipelines and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `cell_coadds` using the branch `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205.
 
 The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 (), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
 
@@ -75,26 +75,26 @@ Metadetection utilizes both inner and outer boundaries of cells, and does not du
 ```{figure} _static/3_band_image_distribution.png
 :name: image_dist
 
-These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle).
+These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though they do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle).
 ```
 
 ```{figure} _static/3_band_psf_e_distribution.png
 :name: ellip_dist
 
-PSF ellipticity distribution with one PSF realization per cell for the patches around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries. The general pattern is consistent with [cite PSF technote], especially in the r- and i-band. The mean ellipticities are 0.0563, 0.0689, and 0.0987 for the g, r, and i-bands, respectively.
+PSF ellipticity distribution with one PSF realization per cell for the patches around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries. The general pattern is consistent with {cite:p}`SITCOMTN-161`, especially in the r- and i-bands. The mean ellipticities are 0.0563, 0.0689, and 0.0987 for the g, r, and i-bands, respectively.
 ```
 
 Note that for cell-based coadds, there is a single PSF model for each cell, realized at the center of the cell. The distribution of PSF ellipticities are seen in {numref}`ellip_dist`.
 
 ## Running Metadetection
 
-Metadetection ({cite:p}`meta_hm`, {cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`) is a shear calibration software focused on an empirical approach of artificially shearing images of galaxies to measure the response calibration matrix R, which is then applied to the unsheared images to calibrate their shear measurements. Metadetection is the sequel software to the original Metacalibration. The primary difference between the two is that while Metacalibration measures the shear response of individual objects for calibration, Metadetection is designed to detect and measure after the applied shear, resulting in 5 catalogs of shear types (non-sheared, in the plus/minus g1 direction, and in the plus/minus g2 direction). The main consequence of this is that since detection is shear-dependent, as seen in {cite:p}`Sheldon_2020`, the 5 Metadetection catalogs do not have necessarily the same objects, and cannot be matched to each other; shear is instead calibrated using the mean shape values.
+Metadetection ({cite:p}`meta_hm`, {cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`) is a shear calibration software focused on an empirical approach of artificially shearing images of galaxies to measure the response calibration matrix R, which is then applied to the unsheared images to calibrate their shear measurements. Metadetection is the sequel software to the original Metacalibration. The primary difference between the two is that while Metacalibration measures the shear response of individual objects for calibration, Metadetection is designed to detect and measure after the applied shear, resulting in 5 catalogs of shear types (non-sheared, in the plus/minus $g_1$ direction, and in the plus/minus $g_2$ direction). The main consequence of this is that since detection is shear-dependent, as seen in {cite:p}`Sheldon_2020`, the 5 Metadetection catalogs do not have necessarily the same objects, and cannot be matched to each other; shear is instead calibrated using the mean shape values.
 
 The default setting for measuring object shapes is `wmom` (weighted moments), used throughout this technote. Each shape measurement is a weighted average of the second moments using the three bands, g, r, and i. The weights for averaging across bands come from the inverse variance of the image. In a similar vein, the flux measurements are the zero moment of each object. Both the zero and second moments are weighted by a Gaussian with a FWHM of 1.2 arcseconds.
 
 Metadetection is currently being integrated into the LSST Science Pipelines as a pipeline task to fully utilize the cell-based coaddition based tasks in the pipeline structure.
 
-The Metadetection shear catalog for this technote was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and metadetect using the branch `u/mirarenee/meta_test`, since a few minor changes were needed to run Metadetection on more recent pipeline stacks.
+The Metadetection shear catalog for this technote was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in `drp_tasks` and `metadetect` using the branch `u/mirarenee/meta_test`, since a few minor changes were needed to run Metadetection on more recent pipeline stacks.
 
 The pipetask command used to generate the Metadetection catalog is found below:
 
@@ -140,7 +140,7 @@ Cluster member galaxies of the lensing cluster structure will not have a lensing
 ```{figure} _static/object-magnitudes.png
 :name: obj-mags
 
-The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts.The red vertical lines are the current magnitude cuts at the limiting magnitude, determined by eye.
+The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts. The red vertical lines are the current magnitude cuts at the limiting magnitude, determined by eye.
 ```
 
 A series of color-magnitude plots with progressive cuts is used to identify the red sequence (RS) galaxies. Each cut is applied to the entire catalog, though only the non-sheared catalog is shown in the color-magnitude plots. Previous visual inspection showed that while there is some variation in  between shear type catalogs, the variation is minimal and random enough that applying the same cuts should be sufficient for this analysis.
@@ -208,7 +208,7 @@ The magnitude cuts also deviate slightly from {cite:p}`yamamoto`. These cuts are
 | `wmom_T` * `wmom_T_err` < 0.006           | 181          | 0.1%             |
 :::
 
-For reference against another catalog, it's useful to at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) after different cuts. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 24362 objects. With the final `Metedetection` source galaxy sample catalog at 9353 for non-sheared objects, HSM is producing over two times as many objects. This comparison is another sign that the low number of usable objects in the Metadetection catalog needs investigation.
+For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` after different cuts. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 24362 objects. With the final `Metedetection` source galaxy sample catalog at 9353 for non-sheared objects, HSM is producing over two times as many objects. This comparison is another sign that the low number of usable objects in the Metadetection catalog needs investigation.
 
 ## Shear Calibration
 
@@ -258,7 +258,7 @@ Shear profile using the same data as {numref}`shear-final`, except R is calculat
 | R_22              | 0.1796                 | 0.2204              |
 | R_11_err          | 0.000935               | 0.0007604           |
 | R_22_err          | 0.000963               | 0.0007670           |
-| \| R_11 - R_22 \| | 0.00595                | 0.01336             |
+| \| R_11 - R_22 \| | 0.0595                 | 0.01336             |
 :::
 
 ## Validation & Testing
@@ -277,9 +277,9 @@ Left: relationship between the object size ratio and the S/N of each object prio
 
 ### Angular Correlations of PSF Ellipticities
 
-The version of cell-based coadds used here is not tested on downstream tasks, which is beyond the scope of this technote. Instead, the PSF information from reserved stars (n=212) is taken from the LSSTComCam DRP `patch_table` using the `w_2025_17` weekly pipeline stack version; the specific collection used is `LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530`. With this in mind, this section covers some angular correlations of PSF qualities between the reserved stars and the model PSF at the center of each cell. For a more thorough treatment of the PSFs in the `Rubin_SV_38_7` field, see [PSF Technote].
+The version of cell-based coadds used here is not tested on downstream tasks, which is beyond the scope of this technote. Instead, the PSF information from reserved stars (n=212) is taken from the LSSTComCam DRP `patch_table` using the `w_2025_17` weekly pipeline stack version; the specific collection used is `LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530`. With this in mind, this section covers some angular correlations of PSF qualities between the reserved stars and the model PSF at the center of each cell. For a more thorough treatment of the PSFs in the `Rubin_SV_38_7` field, see {cite:p}`SITCOMTN-161`.
 
-The PSF quantities used here have the same definitions for both the reserve star PSFs and the cell-based coadd model PSFs, and both only use the i-band. These are defined with:
+The PSF quantities used here have the same definitions for both the reserved star PSFs and the cell-based coadd model PSFs, and both only use the i-band. These are defined with:
 
 $$
 \begin{align}
@@ -290,7 +290,7 @@ e &= \sqrt{e_1^2 + e_2^2}
 \end{align}
 $$ (eqn2)
 
-The moments used for the reserve stars come from the `i_ixx`, `i_iyy`, and `i_ixy` columns from the object table. As for the model PSF, this is measured directly from the PSF model image for each cell using methods from `lsst.afw.math` and `lsst.meas.algorithms`. Angular correlations are calculated using the `TreeCorr` package ({cite:p}`treecorr`), using the default “shot” variance.
+The moments used for the reserved stars come from the `i_ixx`, `i_iyy`, and `i_ixy` columns from the object table. As for the model PSF, this is measured directly from the PSF model image for each cell using methods from `lsst.afw.math` and `lsst.meas.algorithms`. Angular correlations are calculated using the `TreeCorr` package ({cite:p}`treecorr`), using the default “shot” variance.
 
 ```{figure} _static/psf_correlations.png
 :name: psf_correlations
@@ -300,12 +300,12 @@ Top row: Residuals of the measured star PSF properties and the cell model PSFs. 
 
 ### False Detections
 
-{cite:p}`yamamoto` introduces a few cuts for spurious detections. The first is an upper limit of `wmom_T` as a function of `wmom_T_err`, while the second cut is the product of `wmom_T` x `wmom_T_err`. These focus on areas around bright stars and spurious detections within cluster fields, respectively. Plots in {numref}`junk1` and {numref}`junk2` were used to get an initial idea of where the data lied. Visual inspection of these objects showed that the majority are around bright stars, spurious detections, and small galaxies with close, undetected neighbors. Still, these cuts remove potentially viable galaxies from the sample, and don’t find every spurious detection. The values used in these cuts come from maximizing the number of spurious detections removed and minimizing the number of viable galaxies kept using visual inspection.
+{cite:p}`yamamoto` introduces a few cuts for spurious detections. The first is an upper limit of `wmom_T` as a function of `wmom_T_err`, while the second cut is the product of `wmom_T` x `wmom_T_err`. These focus on areas around bright stars and spurious detections within cluster fields, respectively. Plots in {numref}`junk1` and {numref}`junk2` were used to get an initial idea of where the data lie. Visual inspection of these objects showed that the majority are around bright stars, spurious detections, and small galaxies with close, undetected neighbors. Still, these cuts remove potentially viable galaxies from the sample, and don’t find every spurious detection. The values used in these cuts come from maximizing the number of spurious detections removed and minimizing the number of viable galaxies kept using visual inspection.
 
 ```{figure} _static/junk1.png
 :name: junk1
 
-Distribution of data points before and after cuts. The red lines indicate where the relevant junk cut removes data. The large cluster of points prior to applying all cuts in the left plot is mostly stars removed from the star-galaxy cut, and are not present in the plot on the right.
+Distribution of data points before and after cuts. The red lines indicate where the relevant junk cut removes data. The large cluster of points prior to applying all cuts in the left plot is mostly stars removed from the star-galaxy cut, and is not present in the plot on the right.
 ```
 
 ```{figure} _static/junk2.png
@@ -316,7 +316,7 @@ Distribution of data points before and after cuts.
 
 ### Object Distributions
 
-Plotting the distribution of objects on the sky is a simple but effective way to discover inconsistencies within the data. For example, the leftmost plot in {numref}`object-distribution` shows an overdensity of objects detected that align with where patches overlap, unexpected after removing exact duplicates based on RA and DEC coordinates. This duplication is addressed, as seen in the following plots in {numref}`object-distribution`.
+Plotting the distribution of objects on the sky is a simple but effective way to discover inconsistencies within the data. For example, the leftmost plot in {numref}`object-distribution` shows an overdensity of objects detected that aligns with where patches overlap, unexpected after removing exact duplicates based on RA and DEC coordinates. This duplication is addressed, as seen in the following plots in {numref}`object-distribution`.
 
 ```{figure} _static/object-distribution-before-after.png
 :name: object-distribution
