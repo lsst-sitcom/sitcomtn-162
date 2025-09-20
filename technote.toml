@@ -50,3 +50,11 @@ orcid = "https://orcid.org/0000-0003-2314-5336"
 name = "Brown University"
 internal_id = "Brown"
 ror = "https://ror.org/05gq02987"
+[[technote.authors]]
+name = {given = "Rachel", family = "Mandelbaum"}
+internal_id = "mandelbaumr"
+orcid = "https://orcid.org/0000-0003-2271-1527"
+[[technote.authors.affiliations]]
+name = "Carnegie Mellon University"
+internal_id = "CMU"
+ror = "https://ror.org/05x2bcf33"

@@ -16,7 +16,7 @@ This technote is one part of a series studying A360 in order to both stress test
 
 At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipelines and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in [`drp_tasks`](https://github.com/lsst/drp_tasks/tree/u/mirarenee/no_ap_corr/python/lsst/drp/tasks) and [`cell_coadds`](https://github.com/lsst/cell_coadds/tree/u/mirarenee/no_ap_corr), with both using the branch name `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205. For more specific information on cell-based coadds in a shear context, see {cite:p}`cell_slides` for introductory material and {cite:p}`lsst_coadd` for impacts of cell-based coadds on shear measurements.
 
-The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095good`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
+The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095good`, {cite:p}`SITCOMTN-149`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
 
 ```
 pipetask run -j 4 --register-dataset-types  \
