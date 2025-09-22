@@ -9,19 +9,19 @@ Cell-based coadds and Metadetection are both currently in the process of being i
 
 As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog. The shear profile performs best in radial bins further away from the cluster center (beyond ~ 2 Mpc), which may be due to high occurances of blending near the cluster center.
 
-This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection and photometric redshifts in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in (in prep).
+This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection and photometric redshifts in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in {cite:p}`SITCOMTN-165`.
 ```
 
 ## Cell-Based Coadds Input
 
-At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipelines and must be generated independently. The equivalent of the pipetask command below was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in [`drp_tasks`](https://github.com/lsst/drp_tasks/tree/u/mirarenee/no_ap_corr/python/lsst/drp/tasks) and [`cell_coadds`](https://github.com/lsst/cell_coadds/tree/u/mirarenee/no_ap_corr), with both using the branch name `u/mirarenee/no_ap_corr`. The patches and tracts are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205. For more specific information on cell-based coadds in a shear context, see {cite:p}`cell_slides` for introductory material and {cite:p}`lsst_coadd` for impacts of cell-based coadds on shear measurements.
+At the time of this analysis, cell-based coadds are not a part of the default LSST Science Pipelines and must be generated independently. The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095good`, {cite:p}`SITCOMTN-149`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`. The patches and tracts used are those that fully or partially fall within 0.5 degrees of the Brightest Cluster Galaxy of A360 at RA, DEC of 37.865017, 6.982205. For more specific information on cell-based coadds in a shear context, see {cite:p}`cell_slides` for introductory material and {cite:p}`lsst_coadd` for impacts of cell-based coadds on shear measurements. The collection for the cell-based coadds is `u/mgorsuch/ComCam_Cells/a360/corr_noise_cells/20250822T224002Z`, which includes the coadds for the *g*, *r*, and *i*-bands. The cell-based coadds are stored as patch-sized coadds, divided into 484 cell regions (22 by 22 cells). Individual cells have both inner and outer boundary boxes, which are 150 by 150 and 250 by 250 pixels, respectively.
 
-The input images and catalogs used to generated the cell-based coadds and other analyses in this technote are from the LSST DRP1 ({cite:p}`RTN-095good`, {cite:p}`SITCOMTN-149`), focusing on images taken on the Rubin LSSTComCam {cite:p}`ComCam`.
+As development for the cell-based coadds progressed, some tasks were rerun on top of previous tasks to reduce processing time. For transparency, the exact `pipetask` commands, pipeline files, and package versions used will be outlined in the next subsection. As for clarity, the condensed versions of the `pipetask` command and pipeline file will be shown immediately below, though these may not be exactly equivalent to what was actually run.
 
 ```
 pipetask run -j 4 --register-dataset-types  \
 -b /repo/main \
--i ComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
+-i LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
 -o u/$USER/ComCam_Cells/a360 \
 -p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline.yaml \
 -d "((tract=10463 AND patch IN (30..34,40..44,50..54,60..64,70..74,80..84,90..94)) \
@@ -30,8 +30,6 @@ OR (tract=10704 AND patch IN (0..5)) \
 OR (tract=10705 AND patch IN (8, 9))) \
 AND (band='g' OR band='r' OR band='i') AND skymap='lsst_cells_v1'"
 ```
-
-The `pipeline.yaml` file used is shown below:
 
 ```yaml
 description: A simple pipeline to test development of cell-based coadds in ComCam
@@ -48,6 +46,7 @@ tasks:
             connections.masked_fraction_warp: direct_warp_masked_fraction
             doWarpMaskedFraction : true
             doPreWarpInterpolation : true
+            numberOfNoiseRealizations : 1
     makePsfMatchedWarp:
         class: lsst.drp.tasks.make_psf_matched_warp.MakePsfMatchedWarpTask
         config:
@@ -64,15 +63,12 @@ tasks:
         config:
             connections.inputWarps: direct_warp
             connections.visitSummaryList: visit_summary
+            num_noise_realizations : 1
 ```
 
 There are a few reasons why there are additional tasks on top of the cell-based coaddition task, `assembleCellCoadd`. The primary input images for the cell-based coadds are warped images using the `makeDirectWarp` task. For cell-based coadds, the `doPreWarpInterpolation` configuration needs to be set to `True` manually, as the default pipeline setting is False. This `doPreWarpInterpolation` config is used to properly propagate the mask plane from the warps to the cell-based coadds. The `makePsfMatchedWarp` and `assembleDeepCoadd` tasks are needed to generate artifact masks, which are required inputs for the cell-based coaddition task to run.
 
-The collections for the cell-based coadds are stored in `u/mgorsuch/a360_cell_coadd` for *r*- and *i*-bands, and `u/mgorsuch/a360_cell_coadd_g` for *g*-band (separate collections due to not running *g*-band initially).
-
-Cell-based coadds are stored as patch-sized coadds, divided into 484 cell regions (22 by 22 cells). Individual cells have both inner and outer boundary boxes, which are 150 by 150 and 250 by 250 pixels, respectively.
-
-Metadetection utilizes both inner and outer boundaries of cells, and does not duplicate objects from this overlap. However, there is also overlap between patches and tracts that Metadetection does not address, and this leads to duplicate objects within the object tables. Overlap between patches within the same tract is 2 cells wide, and duplicates are removed by removing objects found in the outer ring of cells of each patch. There is also significant overlap between tracts. Patches in tract 10463 that fully overlap with tract 10464 are ignored. After removing the fully overlapping patches, there’s still a 4 cell wide overlap on one side between tract 10463 and 10464. Overlapping cells are again removed. Currently, the WCS information is not enough to remove exact duplicates based on RA and DEC, and some overdensity along patch boundaries are still visible (see {numref}`object-distribution`). Why this is the case requires further investigation.
+Metadetection utilizes both inner and outer boundaries of cells. However, the implementation used for this analysis does not yet remove duplicate objects detected from overlaps between cells, patches, and tracts. This means that the output catalogs will contain duplicate objects that need to be manually removed. Objects that are beyond the inner region of their assigned cell will be simply removed. Overlap between patches within the same tract is 2 cells wide, and duplicates are removed by removing objects found in the outer ring of cells of each patch. There is also significant overlap between tracts. Patches in tract 10463 that fully overlap with tract 10464 are ignored. After removing the fully overlapping patches, there’s still a 4 cell wide overlap on one side between tract 10463 and 10464. Overlapping cells are again removed.
 
 ```{figure} _static/3_band_image_distribution.png
 :name: image_dist
@@ -88,50 +84,135 @@ PSF ellipticity modulus distribution with one PSF realization per cell for the p
 
 Note that for cell-based coadds, there is a single PSF model for each cell, realized at the center of the cell. The distribution of PSF ellipticities are seen in {numref}`ellip_dist`.
 
+### Exact commands used for generating cell-based coadds
+
+The exact commands used to generate the cell-based coadds become quite long and are collected here for transparency and to avoid cluttering other sections.
+
+The two following `pipetask` commands were used to initially generate the cell-based coadds. These collections will also contain the `psf_matched_warp`s and artifact masks needed for later commands. The list is tracts is only shown in the first command, though this list is the same for all commands. These commands below were run on the `w_2025_17` weekly stack version of the Pipeline, with the exception of a few user branches in ['drp_tasks'](https://github.com/lsst/drp_tasks/tree/u/mirarenee/no_ap_corr) and ['cell_coadds'](https://github.com/lsst/cell_coadds/tree/u/mirarenee/no_ap_corr), with both under the branch `u/mirarenee/no_ap_corr`. The pipeline file used was nearly the same as the one listed above, with the only exceptions being the `numberOfNoiseRealizations` and `num_noise_realizations`, which were not yet utilized.
+
+```
+pipetask run -j 4 --register-dataset-types  \
+-b /repo/main \
+-i LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
+-o u/$USER/ComCam_Cells/a360 \
+-p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline.yaml \
+-d "((tract=10463 AND patch IN (30..34,40..44,50..54,60..64,70..74,80..84,90..94)) \
+OR (tract=10464 AND patch IN (37..39,47..49,57..59,67..69,77..79,87..89,97..99)) \
+OR (tract=10704 AND patch IN (0..5)) \
+OR (tract=10705 AND patch IN (8, 9))) \
+AND (band='i' OR band='r') AND skymap='lsst_cells_v1'"
+```
+
+```
+pipetask run -j 4 --register-dataset-types  \
+-b /repo/main \
+-i LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530 \
+-o u/$USER/ComCam_Cells/a360_g \
+-p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline.yaml \
+-d "tract=10463 ... AND (band='g') AND skymap='lsst_cells_v1'"
+```
+
+The `direct_warps` were then recreated in order to generate noise realizations that go through the warping process. These were again run on the weekly stack `w_2025_17` and the `u/mirarenee/no_ap_corr` branches for the `drp_tasks` and `cell_coadds` packages.
+
+```
+pipetask run -j 4 --register-dataset-types  \
+-b /repo/main \
+-i LSSTComCam/runs/DRP/DP1/w_2025_17/DM-50530,u/$USER/ComCam_Cells/a360,u/$USER/ComCam_Cells/a360_g \
+-o u/$USER/ComCam_Cells/a360/corr_noise \
+-p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline-warp-cell.yaml \
+-d "tract=10463 ... AND (band='i' OR band='r' OR band='g') AND skymap='lsst_cells_v1'"
+```
+
+The `pipeline-warp-cell.yaml` file used is below:
+```yaml
+description: A simple pipeline to test development of cell-based coadds in ComCam. This assumes that there is a collection already available containing the artifact masks created using MakePsfMatchedWarpTask and CompareWarpAssembleCoaddTask.
+
+instrument: lsst.obs.lsst.LsstComCam
+
+tasks:
+    makeDirectWarp:
+        class: lsst.drp.tasks.make_direct_warp.MakeDirectWarpTask
+        config:
+            connections.calexp_list: preliminary_visit_image
+            connections.visit_summary: visit_summary
+            connections.warp: direct_warp
+            connections.masked_fraction_warp: direct_warp_masked_fraction
+            doWarpMaskedFraction : true
+            doPreWarpInterpolation : true
+            numberOfNoiseRealizations : 1
+    assembleCellCoadd:
+        class: lsst.drp.tasks.assemble_cell_coadd.AssembleCellCoaddTask
+        config:
+            connections.inputWarps: direct_warp
+            connections.visitSummaryList: visit_summary
+```
+
+ The `pipetask` command below was used to incorporate the noise realization implementation in the cell-based coadds. The command was run on the `w_2025_34` weekly stack version of the Pipeline, with the exception of a few ticket branches in ['drp_tasks'](https://github.com/lsst/drp_tasks/tree/tickets/DM-43585) and ['cell_coadds'](https://github.com/lsst/cell_coadds/tree/tickets/DM-43585), with both under the branch `tickets/DM-43585`.
+
+ ```
+pipetask run -j 4 --register-dataset-types  \
+-b /repo/main \
+-i u/$USER/ComCam_Cells/a360/corr_noise \
+-o u/$USER/ComCam_Cells/a360/corr_noise_cells \
+-p /sdf/group/rubin/user/mgorsuch/ComCam/pipeline-ap.yaml \
+-d "tract=10463 ... AND (band='i' OR band='r' OR band='g') AND skymap='lsst_cells_v1'"
+```
+
+The `pipeline-ap.yaml` used is found below:
+```yaml
+description: A simple pipeline to test development of cell-based coadds in ComCam
+
+instrument: lsst.obs.lsst.LsstComCam
+
+tasks:
+    assembleCellCoadd:
+        class: lsst.drp.tasks.assemble_cell_coadd.AssembleCellCoaddTask
+        config:
+            connections.inputWarps: direct_warp
+            connections.visitSummaryList: visit_summary
+            num_noise_realizations : 1
+```
+
 ## Running Metadetection
 
 Metadetection ({cite:p}`meta_hm`, {cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`, and most recently {cite:p}`Sheldon_2023`) is a shear calibration software focused on an empirical approach of artificially shearing images of galaxies to measure the response calibration matrix R, which is then applied to the unsheared images to calibrate their shear measurements. Metadetection is the sequel software to the original Metacalibration. The primary difference between the two is that while Metacalibration measures the shear response of individual objects for calibration, Metadetection is designed to detect and measure after the applied shear, resulting in 5 catalogs of shear types (non-sheared, in the plus/minus $g_1$ direction, and in the plus/minus $g_2$ direction). The main consequence of this is that since detection is shear-dependent, as seen in {cite:p}`Sheldon_2020`, the 5 Metadetection catalogs do not have necessarily the same objects, and cannot be matched to each other; shear is instead calibrated using the mean shape values.
 
+Metadetection is currently being integrated into the LSST Science Pipelines as a pipeline task to fully utilize the cell-based coaddition based tasks in the pipeline structure. Since this is a work-in-progress, the packages used here are not finalized.
+
 The default setting for measuring object shapes is `wmom` (weighted moments), used throughout this technote. Each shape measurement is a weighted average of the second moments using the three bands, g, r, and i. The weights for averaging across bands come from the inverse variance of the image. In a similar vein, the flux measurements are the zero moment of each object. Both the zero and second moments are weighted by a Gaussian with a FWHM of 1.2 arcseconds.
 
-Metadetection is currently being integrated into the LSST Science Pipelines as a pipeline task to fully utilize the cell-based coaddition based tasks in the pipeline structure.
-
-The Metadetection shear catalog for this technote was run on the `w_2025_17` weekly stack version of the Pipeline, along with customized branches in [`drp_tasks`](https://github.com/lsst/drp_tasks/tree/u/mirarenee/meta_test/python/lsst/drp/tasks) and [`metadetect`](https://github.com/lsst-dm/metadetect/tree/u/mirarenee/meta_test), with both using the branch `u/mirarenee/meta_test`, since a few minor changes were needed to run Metadetection on more recent pipeline stacks.
+The Metadetection shear catalog for this technote was run on the `w_2025_34` weekly stack version of the Pipeline. As for packages, [`metadetect`](https://github.com/lsst/metadetect/tree/lsst-dev) used the `lsst-dev` branch, the ['cell_coadds'](https://github.com/lsst/cell_coadds/tree/tickets/DM-43585) package again used the `tickets/DM-43585` branch, and the [`drp_tasks`](https://github.com/lsst/drp_tasks/tree/u/mirarenee/meta_test/python/lsst/drp/tasks) package used a custom branch `u/mirarenee/meta_test`. The `drp_tasks` user branch was needed to add a few minor changes in order to run Metadetection on more recent pipeline stacks.
 
 The pipetask command used to generate the Metadetection catalog is found below:
 
 ```
 pipetask run -j 4 --register-dataset-types \
 -b /repo/main \
--i refcats,u/mgorsuch/a360_cell_coadd,u/mgorsuch/a360_cell_coadd_g \
--o u/$USER/metadetect/a360_3_band \
+-i refcats,u/mgorsuch/ComCam_Cells/a360/corr_noise_cells \
+-o u/$USER/metadetect/a360_3_band/noise \
 -p /sdf/group/rubin/user/mgorsuch/notebooks/metadetect/comcam_pipeline.yaml \
+-c metadetectionShear:shape_fitter='wmom' \
 -d "skymap='lsst_cells_v1'"
 ```
 
 The associated `comcam_pipeline.yaml` file used for defining the tasks is outline below:
 
 ```yaml
-description: Pipeline for running metadetection on ComCam
+description: Pipeline for running metadetection on DC2
 instrument: lsst.obs.lsst.LsstComCam
 
 tasks:
     metadetectionShear:
         class: lsst.drp.tasks.metadetection_shear.MetadetectionShearTask
         config:
-            connections.ref_cat: the_monster_20250219
             required_bands : ["g", "r", "i"]
+            connections.ref_cat: the_monster_20250219
+            shape_fitter: "wmom"
             python: |
-               from metadetect.lsst.configs import get_config as get_mdet_config
-               mdet_config = get_mdet_config()
-               mdet_config['metacal']['types']=['noshear', '1p', '1m', '2p', '2m']
-
-               config.ref_loader.filterMap = {'lsst_'+band: 'monster_ComCam_%s' % (band) for band in 'ugrizy'}
+                config.ref_loader.filterMap = {'lsst_'+band: 'monster_ComCam_%s' % (band) for band in 'ugrizy'}
 ```
 
-Currently, with the custom branches, the only python line needed in the pipeline file is the filter map. The custom branches have a workaround in place for changing Metadetection specific configs for the time being, though the additional python lines should be sufficient for changing those configs through the pipeline file in the future.
-
-An important note is that, for this analysis, a single noise image is generated for each cell within Metadetection. The noise image is generated from a Gaussian distribution centered at 0 with a variance equal to the median variance of the image. It’s possible to produce multiple noise images prior to the warping process in order to better account for noise correlation across pixels, though this extra warping is computationally expensive and skipped for now. This may lead to underestimates in the shape uncertainties.
+An important note is that, for this analysis, a single noise image is associated for each cell within Metadetection. A noise image is generated for each warp that is also subjected to the warping process, which is needed to accurately capture correlated noise ({cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`). The noise distribution is randomly pulled from a Gaussian distribution centered at 0 with a variance equal to the median variance of the input image.
 
 After removing duplicated objects from patch overlap, there are a total of 1174579 object rows across the five shear type catalogs. After removing objects flagged by Metadetection (i.e. objects cut due to measurement failures), there are 967436 objects, about 17.6% of the initial catalog. The number of flagged objects is quite high, and requires further investigation.
 
