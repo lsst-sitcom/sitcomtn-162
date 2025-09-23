@@ -230,7 +230,7 @@ A series of color-magnitude plots with progressive cuts is used to visually iden
 
 The catalog is first cut to galaxies less than 0.1 degree away from the BCG to focus on galaxies that are more likely to be cluster members. The red sequence cluster members are identified in a line of objects with relatively consistent color across a range of magnitudes, with the line being more apparent in the smaller sample of galaxies. This line of galaxies is highlighted with orange points, with the upper and lower limits shown in red. The same visual inspection is done again for the larger sample of galaxies, those within 0.5 degrees of the BCG.
 
-RS galaxies are selected if they satisfy one of the following requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, *or* the 2-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `wmom_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `wmom_band_mag_i` < 20) are removed below as described in the selection cut section.
+RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 2-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `wmom_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `wmom_band_mag_i` < 20) are removed below as described in the selection cut section.
 
 Once the RS galaxies are identified, they are removed from the sample of galaxies within 0.5 degrees of the BCG, which the becomes the sample that goes on the further selection cuts.
 
@@ -258,11 +258,9 @@ After applying the 0.5 degree cut, but prior to removing RS objects, there are 5
 
 After Metadetection flags are applied and red sequence galaxies are identified and removed, additional selection cuts are applied. These cuts are primarily based on {cite:p}`yamamoto`, though are customized in several cases to better fit the data from LSSTComCam. A detailed outline of the cuts used and object removed can be seen in {numref}`selection_cuts`. In numerical terms, the number of objects remaining after selection cuts is 78500, with 15819 (20%) in the non-sheared catalog.
 
-The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Meanwhile, the weighted moments measurements with Metadetection for T and T_PSF are both measured after the reconvolution step, and will be slightly larger; stars will hover closer to 1. The Metadetection paper {cite:p}`Sheldon_2023` uses a cut of 1.2 for this size ratio, and indicates that while the inclusion of stars might introduce a bias, it’s quite small.
+The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Meanwhile, the Metadetection measurements here use the `wmom` algorithm, meaning T and T_PSF are both measured after the reconvolution step, and will be slightly larger; stars will hover closer to 1. The Metadetection paper {cite:p}`Sheldon_2023` uses a cut of 1.2 for this size ratio, and indicates that while the inclusion of stars might introduce a bias, it’s quite small. Based on {numref}`obj_T_vs_s2n`, the stars identified around `wmom_T_ratio` = 1 appear to fall consistently below `wmom_T_ratio` = 1.1. This value is chosen instead for the `wmom_T_ratio` cut, since the inclusion of extra galaxies in the weak lensing sample outweighs the potential inclusion of some low S/N stars.
 
-Based on {numref}`obj_T_vs_s2n`, the stars identified around `wmom_T_ratio` = 1 appear to fall consistently below `wmom_T_ratio` = 1.1. This value is chosen instead for the `wmom_T_ratio` cut, since the inclusion of extra galaxies in the weak lensing sample outweighs the potential inclusion of some low S/N stars.
-
-The magnitude cuts also deviate slightly from {cite:p}`yamamoto`. These cuts are based on the estimated limiting magnitude of each band, as seen from {numref}`obj-mags`.
+There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of [magnitude plots], and the junk cuts are specific to DES and don't seem to appear in LSSTComCam data.
 
 :::{table} Each cut applied to the Metadetection catalog after the RS cuts. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
 :name: selection_cuts
@@ -280,8 +278,6 @@ The magnitude cuts also deviate slightly from {cite:p}`yamamoto`. These cuts are
 | `wmom_band_mag_i` > 20 (brightness cut) | 5240         | 2.0%             |
 | `wmom_color_mag_g-r` (abs. value) < 5   | 1007         | 0.4%             |
 | `wmom_color_mag_r-i` (abs. value) < 5   | 134          | 0.1%             |
-| `wmom_T` < 0.425 - 2.0*`wmom_T_err`       | 21058         | 8.1%             |
-| `wmom_T` * `wmom_T_err` < 0.006           | 2243          | 0.9%             |
 :::
 
 For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 23531 objects. With the final `Metedetection` source galaxy sample catalog at 15819 for non-sheared objects, HSM is producing about 1.5x as many objects for the final shear catalog. However, it should also be noted that prior to RS cuts, Metadetection produces a comparable number of objects as HSM (193522 vs. 183791). This final difference is less surprising, then, as the selection cuts are between technotes differ due to the nature of separate catalogs. Still, the discrepancy is high enough that further cross-checks between the two catalogs would be beneficial.
@@ -343,22 +339,6 @@ The measured object size compared to the signal-to-noise ratio is a simple cut t
 :name: obj_T_vs_s2n
 
 The relationship between the object size ratio and the S/N of each object before and after selection cuts (both with red sequence galaxies removed). The red line is a visual reference to see what objects are removed by the 1.1 object size ratio cut, though other objects may be removed due to additional cuts. Stars are expected to fall near an object ratio of 1, which is seen clearly for high S/N objects. The remaining objects have the line of stars removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties as seen in {cite:p}`yamamoto`.
-```
-
-### False Detections
-
-{cite:p}`yamamoto` introduces a few cuts for spurious detections. The first is an upper limit of `wmom_T` as a function of `wmom_T_err`, while the second cut is the product of `wmom_T` x `wmom_T_err`. These focus on areas around bright stars and spurious detections within cluster fields, respectively. Plots in {numref}`junk1` and {numref}`junk2` were used to get an initial idea of where the data lie. Visual inspection of these objects showed that the majority are around bright stars, spurious detections, and small galaxies with close, undetected neighbors. Still, these cuts remove potentially viable galaxies from the sample, and don’t find every spurious detection. The values used in these cuts come from minimizing the number of spurious detections and maximizing the number of viable galaxies kept in the final catalog using visual inspection.
-
-```{figure} _static/junk1.png
-:name: junk1
-
-Distribution of data points before and after cuts. The red lines indicate where the relevant junk cut removes data. The large cluster of points prior to applying all cuts in the left plot is mostly stars removed from the star-galaxy cut, and is not present in the plot on the right.
-```
-
-```{figure} _static/junk2.png
-:name: junk2
-
-The distributions of data points before and after cuts were used for the purpose of estimating an intial value for the `wmom_T` x `wmom_T_err` cut. It should be noted that while the majority of objects that are removed with this cut are spurious, all of these objects identified in this cut are already removed by the other cuts.
 ```
 
 ### Object Distributions
