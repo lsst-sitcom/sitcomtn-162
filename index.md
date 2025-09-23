@@ -260,7 +260,7 @@ After Metadetection flags are applied and red sequence galaxies are identified a
 
 The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Meanwhile, the Metadetection measurements here use the `wmom` algorithm, meaning T and T_PSF are both measured after the reconvolution step, and will be slightly larger; stars will hover closer to 1. The Metadetection paper {cite:p}`Sheldon_2023` uses a cut of 1.2 for this size ratio, and indicates that while the inclusion of stars might introduce a bias, it’s quite small. Based on {numref}`obj_T_vs_s2n`, the stars identified around `wmom_T_ratio` = 1 appear to fall consistently below `wmom_T_ratio` = 1.1. This value is chosen instead for the `wmom_T_ratio` cut, since the inclusion of extra galaxies in the weak lensing sample outweighs the potential inclusion of some low S/N stars.
 
-There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of [magnitude plots], and the junk cuts are specific to DES and don't seem to appear in LSSTComCam data.
+There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of [magnitude histogram plots], while the junk cuts and size cuts are specific to DES and don't seem to appear to affect LSSTComCam data.
 
 :::{table} Each cut applied to the Metadetection catalog after the RS cuts. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
 :name: selection_cuts
@@ -268,16 +268,14 @@ There are a few additional differences from the {cite:p}`yamamoto` cuts. The mag
 
 | Selection Cut                         | Rows Removed | Fraction Removed |
 | :------------------------------------ | -----------: | ---------------: |
-| `wmom_T_ratio` > 1.1                    | 111628        | 43.2%            |
-| `wmom_s2n` > 10                         | 68771         | 26.6%            |
-| `wmom_T` < 20                           | 0            | 0.0%             |
+| `wmom_T_ratio` > 1.1                    | 88914         | 43.5%            |
+| `wmom_s2n` > 10                         | 52959         | 25.9%            |
 | `mfrac` < 0.1                           | 0            | 0.0%             |
-| `wmom_band_mag_g` < 25.7                | 93957        | 36.3%            |
-| `wmom_band_mag_r` < 25.4                | 52843        | 20.4%            |
-| `wmom_band_mag_i` < 25.1                | 57102        | 22.1%            |
-| `wmom_band_mag_i` > 20 (brightness cut) | 5240         | 2.0%             |
-| `wmom_color_mag_g-r` (abs. value) < 5   | 1007         | 0.4%             |
-| `wmom_color_mag_r-i` (abs. value) < 5   | 134          | 0.1%             |
+| `wmom_band_mag_i` < 24.0                | 135999       | 66.5%            |
+| `wmom_band_mag_i` > 20 (brightness cut) | 3114         | 1.5%             |
+| `wmom_color_mag_g-r` (abs. value) < 5   | 742          | 0.4%             |
+| `wmom_color_mag_r-i` (abs. value) < 5   | 78           | 0.03%            |
+| `wmom_color_mag_g-i` (abs. value) < 5   | 828          | 0.4%             |
 :::
 
 For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 23531 objects. With the final `Metedetection` source galaxy sample catalog at 15819 for non-sheared objects, HSM is producing about 1.5x as many objects for the final shear catalog. However, it should also be noted that prior to RS cuts, Metadetection produces a comparable number of objects as HSM (193522 vs. 183791). This final difference is less surprising, then, as the selection cuts are between technotes differ due to the nature of separate catalogs. Still, the discrepancy is high enough that further cross-checks between the two catalogs would be beneficial.
