@@ -260,7 +260,7 @@ After Metadetection flags are applied and red sequence galaxies are identified a
 
 The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Meanwhile, the Metadetection measurements here use the `wmom` algorithm, meaning T and T_PSF are both measured after the reconvolution step, and will be slightly larger; stars will hover closer to 1. The Metadetection paper {cite:p}`Sheldon_2023` uses a cut of 1.2 for this size ratio, and indicates that while the inclusion of stars might introduce a bias, it’s quite small. Based on {numref}`obj_T_vs_s2n`, the stars identified around `wmom_T_ratio` = 1 appear to fall consistently below `wmom_T_ratio` = 1.1. This value is chosen instead for the `wmom_T_ratio` cut, since the inclusion of extra galaxies in the weak lensing sample outweighs the potential inclusion of some low S/N stars.
 
-There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of [magnitude histogram plots], while the junk cuts and size cuts are specific to DES and don't seem to appear to affect LSSTComCam data.
+There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of {numref}`mag_cut` and {cite:p}`SITCOMTN-161`, while the junk cuts and size cuts are specific to DES and don't seem to appear to affect LSSTComCam data.
 
 :::{table} Each cut applied to the Metadetection catalog after the RS cuts. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
 :name: selection_cuts
@@ -278,9 +278,27 @@ There are a few additional differences from the {cite:p}`yamamoto` cuts. The mag
 | `wmom_color_mag_g-i` (abs. value) < 5   | 828          | 0.4%             |
 :::
 
+
+As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found below.
+
+- **All detections**: all detections that have a finite *i*-band magnitude
+- **Good detections**: flagged objects removed
+- **Masks**: masks for bright objects, SFD dust map, galactic cirrus, and exposure quality are applied
+- **WL Cuts**: reduce to 0.5 degree radius around BCG, general quality checks
+- **Star-galaxy**: size ratio cut to remove stars from the sample
+- **Magnitude Cut**: the magnitude where SNR begins to remove objects
+- **SNR Cut**: objects with SNR < 10 are removed
+- **RS Cuts**: red sequence galaxies are identified and removed
+
+```{figure} _static/mag-cut-hist2.png
+:name: mag-cut-hist2
+
+Magnitude distributions after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described above. Right: The magnitude cut is not applied to show where the SNR cut begins to remove objects. The magnitude cut is instead represented by the vertical gray line.
+```
+
 For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 23531 objects. With the final `Metedetection` source galaxy sample catalog at 15819 for non-sheared objects, HSM is producing about 1.5x as many objects for the final shear catalog. However, it should also be noted that prior to RS cuts, Metadetection produces a comparable number of objects as HSM (193522 vs. 183791). This final difference is less surprising, then, as the selection cuts are between technotes differ due to the nature of separate catalogs. Still, the discrepancy is high enough that further cross-checks between the two catalogs would be beneficial.
 
-The final source densities for Metadetection and HSM catalogs from these values, using the same 0.5 degree radius, are ~5.6 $\text{arcmin}^{-2}$ and ~8.3 $\text{arcmin}^{-2}$, respectively.
+The final source densities for Metadetection and HSM catalogs from these values, using the same 0.5 degree radius, are ~5.6 $\text{arcmin}^{-2}$ and ~8.3 $\text{arcmin}^{-2}$, respectively. [Add galaxy density plot]
 
 ## Shear Calibration
 
