@@ -315,7 +315,9 @@ $$
 \end{align}
 $$ (eqn1)
 
-In the specific case of cluster lensing, we are more interested in the tangential and cross shears around the cluster, split into radial bins. The response matrix R is first calculated on all galaxy ellipticities measurements from the four sheared catalogs, after all applied cuts, but prior to binning in order to improve the uncertainty of R. Then for each bin, the mean tangential and cross ellipticities are calculated from the uncalibrated galaxy ellipticity measurements in the non-sheared catalog. The response matrix R is then applied to the mean tangential and cross ellipticities to produce the calibrated tangential and cross shears for the bin.
+In the specific case of cluster lensing, we are more interested in the tangential and cross shears around the cluster, split into radial bins. The response matrix R is first calculated on all galaxy ellipticities measurements from the four sheared catalogs, after all applied cuts, but prior to binning in order to improve the uncertainty of R. The calibration is then applied to the galaxies in the non-sheared catalog, producing the reduced shear. Using the utilities in the Cluster Lensing Mass Modeling (CLMM) code {cite:p}`clmm`, the mean tangential and cross terms are calculated from the calibrated shears for each radial bin.
+
+A note on coordinate systems: Both the Metadetection $g_1$ and $g_2$ shapes and the CLMM code used here utilize the "Euclidean" definition described in section 5.1 of {cite:p}`galsim`.
 
 ### Shear Results
 
@@ -329,7 +331,7 @@ The Mpc distances are assuming a cluster redshift of z=0.22 {cite:p}`a360_z`.
 The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. Both measured profiles have 95% confidence intervals.
 ```
 
-The theoretical shear profile is produced using Cluster Lensing Mass Modeling (CLMM) code {cite:p}`clmm`. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW halo with an estimated cluster mass of 4e14 solar masses ({cite:p}`a360_mass`) and a concentration of 4. The source redshift distribution is based off of the DESC Science Requirements Document (SRD, {cite:p}`desc-srd`) Y10 N(z).
+The theoretical shear profile is produced using CLMM. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW halo with an estimated cluster mass of 4e14 solar masses ({cite:p}`a360_mass`) and a concentration of 4. The source redshift distribution is based off of the DESC Science Requirements Document (SRD, {cite:p}`desc-srd`) Y10 N(z).
 
 :::{table} Values of the R components used to calibrate the shape measurements. The values are taken after all cuts are applied to the source galaxy sample.
 :widths: auto
