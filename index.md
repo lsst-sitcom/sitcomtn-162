@@ -278,7 +278,7 @@ There are a few additional differences from the {cite:p}`yamamoto` cuts. The mag
 | `wmom_color_mag_g-i` (abs. value) < 5   | 828          | 0.4%             |
 :::
 
-As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found in {numref}`magnitude_cuts`, with the numbers in the non-sheared catalog after each cut is applied.
+As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found in {numref}`mag_dist_nums`, with the numbers in the non-sheared catalog after each cut is applied.
 
 ```{figure} _static/mag-cut-hist2.png
 :name: mag-cut-hist2
