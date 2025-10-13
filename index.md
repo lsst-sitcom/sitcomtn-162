@@ -266,19 +266,19 @@ There are a few additional differences from the {cite:p}`yamamoto` cuts. The mag
 :name: selection_cuts
 :widths: auto
 
-| Selection Cut                           | Rows Removed | Fraction Removed |
-| :-------------------------------------- | -----------: | ---------------: |
-| `wmom_T_ratio` > 1.1                    | 88914         | 43.5%            |
-| `wmom_s2n` > 10                         | 52959         | 25.9%            |
-| `mfrac` < 0.1                           | 0            | 0.0%             |
-| `wmom_band_mag_i` < 24.0                | 135999       | 66.5%            |
-| `wmom_band_mag_i` > 20 (brightness cut) | 3114         | 1.5%             |
-| `wmom_color_mag_g-r` (abs. value) < 5   | 742          | 0.4%             |
-| `wmom_color_mag_r-i` (abs. value) < 5   | 78           | 0.03%            |
-| `wmom_color_mag_g-i` (abs. value) < 5   | 828          | 0.4%             |
+| Selection Cut                            | Rows Removed | Fraction Removed |
+| :--------------------------------------- | -----------: | ---------------: |
+| `gauss_T_ratio` > 1.05                   | 76863        | 37.5%            |
+| `gauss_s2n` > 10                         | 30335        | 14.8%            |
+| `mfrac` < 0.1                            | 0            | 0.0%             |
+| `gauss_band_mag_i` < 23.5                | 74987        | 36.6%            |
+| `gauss_band_mag_i` > 20 (brightness cut) | 11161        | 5.5%             |
+| `gauss_color_mag_g-r` (abs. value) < 5   | 355          | 0.2%             |
+| `gauss_color_mag_r-i` (abs. value) < 5   | 49           | 0.02%            |
+| `gauss_color_mag_g-i` (abs. value) < 5   | 574          | 0.3%             |
 :::
 
-As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found in {numref}`mag_dist_nums`, with the numbers in the non-sheared catalog after each cut is applied.
+As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found in {numref}`mag_dist_nums`, with the numbers in the non-sheared catalog after each cut is applied. The cuts listed for {numref}`mag-cut-hist2` and {numref}`mag_dist_nums` are not in the same order that the cuts are applied within the shear profile analysis, but are rather used to understand the significance of the SNR cut.
 
 ```{figure} _static/mag-cut-hist2.png
 :name: mag-cut-hist2
@@ -292,21 +292,25 @@ Magnitude distributions of the *i*-band after various cuts done to produce the w
 
 | Cut Name             | Description                                         | Rows in non-sheared catalog |
 | :------------------- | :-------------------------------------------------- | --------------------------: |
-| **All detections**   | Detections that have a finite *i*-band magnitude    | 172157                      |
-| **Good detections**  | Flagged and duplicate objects removed               | 54232                       |
-| **Masks**            | Masks are applied                                   | 42807                       |
-| **WL Cuts**          | Selection cuts                                      | 41950                       |
-| **Star-galaxy**      | Size ratio cut to remove stars from the sample      | 30514                       |
-| **Magnitude Cut**    | the magnitude where SNR begins to remove objects    | 11719                       |
-| **SNR Cut**          | objects with SNR < 10 are removed                   | 11711                       |
-| **RS Cuts**          | red sequence galaxies are identified and removed    | 9921                        |
+| **All detections**   | Detections that have a finite *i*-band magnitude    | 178698                      |
+| **Good detections**  | Flagged and duplicate objects removed               | 54228                       |
+| **Masks**            | Masks are applied                                   | 42806                       |
+| **WL Cuts**          | Selection cuts                                      | 39735                       |
+| **Star-galaxy**      | Size ratio cut to remove stars from the sample      | 25001                       |
+| **Magnitude Cut**    | Magnitude where SNR begins to remove objects        | 18645                       |
+| **SNR Cut**          | Objects with SNR < 10 are removed                   | 18566                       |
+| **RS Cuts**          | Red sequence galaxies are identified and removed    | 17651                       |
 :::
 
-For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 183791 objects prior to any cuts. After RS cuts, there are 104257 objects. Finally, after selection cuts, the final HSM source galaxy sample is 23531 objects.
+For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 175383 objects prior to any cuts, and then 12852 objects after all cuts are applied. This is a similar ballpark as the final Metadetect catalog size of 17651, especially considering that the selection and quality cuts of two catalogs differ due to the nature of separate catalogs.
 
-With the final `Metedetection` source galaxy sample catalog at 15819 for non-sheared objects, HSM is producing about 1.5x as many objects for the final shear catalog. However, it should also be noted that prior to RS cuts, Metadetection produces a comparable number of objects as HSM (193522 vs. 183791). This final difference is less surprising, then, as the selection cuts are between technotes differ due to the nature of separate catalogs. Still, the discrepancy is high enough that further cross-checks between the two catalogs would be beneficial.
+The global source density for Metadetection is 8.14 $\pm$ 0.1 $\text{arcmin}^{-2}$, comparable to the 7-8 $\text{arcmin}^{-2}$ range found using the HSM catalog in {cite:p}`SITCOMTN-161`. The density for the Metadetection catalog does trend a bit higher, towards the range of 8-9 $\text{arcmin}^{-2}$, though this is likely due to the fact that this HSM estimate does not yet account for the area affected by masks.
 
-The final source densities for Metadetection and HSM catalogs from these values, using the same 0.5 degree radius, are ~5.6 $\text{arcmin}^{-2}$ and ~8.3 $\text{arcmin}^{-2}$, respectively. [Add galaxy density plot]
+```{figure} _static/gal_den_profile.png
+:name: galaxy-den-profile
+
+The galaxy density within each radial bin used for the shear profile. Error bars are one standard deviation Poisson shot noise. Area that has been masked is removed from the calculation.
+```
 
 ## Shear Calibration
 
