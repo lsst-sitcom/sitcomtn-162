@@ -321,14 +321,25 @@ The objects in the Metadetection catalogs are then matched to the objects in the
 Once the matched catalogs are created, and using the cosmology parameters listed in the introduction, the statistics of the lensing efficiency can be calculated. The CLMM package has tools for calculating these using the photo-z point estimate of each galaxy, with the theory based on {cite:p}`beta_theory`, which will be summarized below.
 
 First off is the geometric lensing efficiency $\beta$, which is the ratio between $D_{ls}$ and $D_s$, the angular diameter distances between the lens and and the source, and the observer to the source, respectively. $\beta$ is not allowed to go below zero, as sources in front cluster will have no contribution to the lensing signal. The $\beta_s$ term then is the ratio of $\beta$'s of a source at a specific redshift, and a test source at infinite redshift (set to $z=1000$ by default).
+
 $$
-\beta = \text{max}\left( 0, \frac{D_{ls}}{D_{s}} \right) ,\quad \beta_s(z_i) = \frac{\beta(z_i)}{\beta_{\infty}}
+\begin{align}
+\beta &= \text{max}\left( 0, \frac{D_{ls}}{D_{s}} \right) \\
+\beta_s(z_i) &= \frac{\beta(z_i)}{\beta_{\infty}}
+\end{align}
 $$
+
 From the matched source galaxy sample, the statistics of these $\beta$ parameters can be calculated. Weights can be implemented, though this analysis simply sets the weights to 1 to produce a simple mean.
+
 $$
-\left<\beta_s\right> = \frac{\Sigma\beta_s(z_i)w_i}{\Sigma w_i} ,\quad \left<\beta_s^2\right> = \frac{\Sigma\beta_s^2(z_i)w_i}{\Sigma w_i}
+\begin{align}
+\left<\beta_s\right> &= \frac{\Sigma\beta_s(z_i)w_i}{\Sigma w_i} \\
+\left<\beta_s^2\right> &= \frac{\Sigma\beta_s^2(z_i)w_i}{\Sigma w_i} \\
+\end{align}
 $$
+
 With the mean $\beta_s$ statistics a curve predicting the shape of the reduced shear as a function of $R$, the projected radial distance from the BCG in Mpc, is approximately given by
+
 $$
 \begin{align}
 g(R) &\approx \left(\frac{\left<\beta_s\right>\gamma_{\infty}(R)}{1-\left<\beta_s\right>\kappa_{\infty}(R)}\right)
