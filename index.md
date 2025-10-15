@@ -73,7 +73,7 @@ Metadetection utilizes both inner and outer boundaries of cells. However, the im
 ```{figure} _static/3_band_image_distribution.png
 :name: image_dist
 
-These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though they do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle). The colorbar is scaled to the minimum and maximum number of inputs images across the three bands (1 and 16, respectively).
+These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though they do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle). Additionally, the 0.3 degree radius (orange circle) contains no missing patches; this radius contains the upper limit of the data used for the shear profile after binning is applied. The colorbar is scaled to the minimum and maximum number of inputs images across the three bands (1 and 16, respectively).
 ```
 
 ```{figure} _static/3_band_psf_e_distribution.png
