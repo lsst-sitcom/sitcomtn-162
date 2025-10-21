@@ -191,7 +191,7 @@ pipetask run -j 4 --register-dataset-types \
 -i refcats,u/mgorsuch/ComCam_Cells/a360/corr_noise_cells \
 -o u/$USER/metadetect/a360_3_band/noise \
 -p /sdf/group/rubin/user/mgorsuch/notebooks/metadetect/comcam_pipeline.yaml \
--c metadetectionShear:shape_fitter='wmom' \
+-c metadetectionShear:shape_fitter='gauss' \
 -d "skymap='lsst_cells_v1'"
 ```
 
@@ -207,7 +207,7 @@ tasks:
         config:
             required_bands : ["g", "r", "i"]
             connections.ref_cat: the_monster_20250219
-            shape_fitter: "wmom"
+            shape_fitter: "gauss"
             python: |
                 config.ref_loader.filterMap = {'lsst_'+band: 'monster_ComCam_%s' % (band) for band in 'ugrizy'}
 ```
@@ -230,7 +230,7 @@ A series of color-magnitude plots with progressive cuts is used to visually iden
 
 The catalog is first cut to galaxies less than 0.1 degree away from the BCG to focus on galaxies that are more likely to be cluster members. The red sequence cluster members are identified in a line of objects with relatively consistent color across a range of magnitudes, with the line being more apparent in the smaller sample of galaxies. This line of galaxies is highlighted with orange points, with the upper and lower limits shown in red. The same visual inspection is done again for the larger sample of galaxies, those within 0.5 degrees of the BCG.
 
-RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 2-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `wmom_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `wmom_band_mag_i` < 20) are removed below as described in the selection cut section.
+RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 2-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `gauss_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `gauss_band_mag_i` < 20) are removed below as described in the selection cut section.
 
 Once the RS galaxies are identified, they are removed from the sample of galaxies within 0.5 degrees of the BCG, which the becomes the sample that goes on the further selection cuts.
 
@@ -424,7 +424,7 @@ Object distributions of the non-sheared catalog at various points during cuts. L
 
 From what was able to be achieved within this technote, the combination of cell-based coadds and Metadetection have the necessary infrastructure needed to successfully run end-to end within the LSST Science Pipelines infrastructure and produce a shape catalog. With this shape catalog, a tangential shear profile of A360 was created. Radial bins beyond ~2 Mpc tend to perform the best, while the inner bins struggle to find a clear signal; this is not surprising within a cluster environment.
 
-As for technical details, it should be noted that many configuration settings are not yet available to the pipeline infrastructure through pipeline `.yaml` files. The main motivation for custom branches was to enable changes (e.g. changing `wmom` to `pgauss`) for testing purposes.
+As for technical details, it should be noted that many configuration settings are not yet available to the pipeline infrastructure through pipeline `.yaml` files. The main motivation for custom branches was to enable changes (e.g. changing `wmom` to `gauss`) for testing purposes.
 
 There are still plenty of tasks that can done next. It might be beneficial to incorporate alternative deblending algorithms to potentially improve the performance of the shear profile within the inner radial bins near the cluster center. Additionally, running detection tasks on the cell-based coadds would be helpful for comparing objects detected in the Metadetection catalog, as well as obtain PSF measurements for reserved stars in order to do a more thorough $\rho$-statistics analysis. More technical investigations should be done to understand why object coordinates differ between patches with the same WCS information, as well as investigate the source of extremely large S/N values and lack of objects with a S/N below 10.
 
