@@ -355,7 +355,7 @@ The terms $\gamma_{\infty}$ and $\kappa_{\infty}$ represent the shear and conver
 
 Understanding the relationship between the shear applied to an object and the effect of that shear on measuring the object’s shape is a critical step to calibrating the catalog’s shear measurements. The main purpose of Metadetection’s 5 sub-catalogs is to calculate the linear response matrix, R.
 
-The main assumption is that the weak lensing shear signal is small enough that we can Taylor expand the measured galaxy ellipticity about a zero shear signal. The first term goes to 0 in the limit of a large enough sample of galaxies where the shape noise averages out. The relation between the measured galaxy ellipticity and the resulting shear signal is controlled by R, the linear response of the ellipticity to an applied shear. Within the Metadetection framework, the components of R can be calculated by taking the mean measured galaxy ellipticities of the 4 artificially shear object catalogs. The magnitude of the applied shear in each catalog is 0.01, to make $\Delta\gamma_j$ a total of 0.02 for each component of R. Once R is calculated, it’s applied to the mean non-sheared object ellipticities to produce the calibrated shear.
+The main assumption is that the weak lensing shear signal is small enough that we can Taylor expand the measured galaxy ellipticity about a zero shear signal. The first term goes to 0 in the limit of a large enough sample of galaxies where the shape noise averages out. The relation between the measured galaxy ellipticity and the resulting shear signal is controlled by R, the linear response of the ellipticity to an applied shear. Within the Metadetection framework, the components of R can be calculated by taking the mean measured galaxy ellipticities of the 4 artificially shear object catalogs. The magnitude of the applied shear in each catalog is 0.01, to make $\Delta\gamma_j$ a total of 0.02 for each component of R. Once R is calculated, it’s applied to the mean non-sheared object ellipticities to produce the calibrated reduced shear.
 
 $$
 \begin{align}
@@ -366,34 +366,34 @@ $$
 \end{align}
 $$ (eqn1)
 
-In the specific case of cluster lensing, we are more interested in the tangential and cross shears around the cluster, split into radial bins. The response matrix R is first calculated on all galaxy ellipticities measurements from the four sheared catalogs, after all applied cuts, but prior to binning in order to improve the uncertainty of R. The calibration is then applied to the galaxies in the non-sheared catalog, producing the reduced shear. Using the utilities in the Cluster Lensing Mass Modeling (CLMM) code {cite:p}`clmm`, the mean tangential and cross terms are calculated from the calibrated shears for each radial bin.
+In the specific case of cluster lensing, we are more interested in the tangential and cross shears around the cluster, split into radial bins. The response matrix R is first calculated on all galaxy ellipticities measurements from the four sheared catalogs, after all applied cuts, but prior to binning in order to improve the uncertainty of R. The calibration is then applied to the galaxies in the non-sheared catalog, producing the reduced shear. Using the utilities in CLMM, the mean tangential and cross terms are calculated from the calibrated shears for each radial bin.
 
 A note on coordinate systems: Both the Metadetection $g_1$ and $g_2$ shapes and the CLMM code used here utilize the "Euclidean" definition described in section 5.1 of {cite:p}`galsim`.
 
 ### Shear Results
 
-The resulting shear profile is shown below in {numref}`shear-final`. Each bin is calculated from the calibrated shapes of galaxies in six bins that range from 0.32 Mpc to 6.39 Mpc, split evenly in $\log_{10}$ space. The x-axis shear profile points are calculated from the mean Mpc distance of each object for each bin. The error bars for all shear profiles are bootstrapped samples of each radial bin with 95% confidence levels, which is then calibrated with R. From smallest radial separation to largest, the number of galaxies in each bin are 68, 222, 511, 1388, 3401, and 10184 galaxies. Despite shear around clusters typically being fairly noisy, there is a visible upward trend in the tangential shear, with the cross shear typically hovering around 0. The exception is the bin closest to the BCG, which may be due to high blending. This region is also particularly sensitive to the binning process with the low galaxy count.
+The resulting shear profile is shown below in {numref}`shear-final`. Each bin is calculated from the calibrated shapes of galaxies in five bins that range from 0.71 Mpc to 3.75 Mpc, split evenly in $\log_{10}$ space. The range for the binning is based off of {cite:p}`binning`. The error bars for the bins are 1 standard error (standard deviation / $\sqrt(N)$). From smallest radial separation to largest, the number of galaxies in each bin are 245, 433, 974, 1810, and 3119 galaxies. Despite shear around clusters typically being fairly noisy, there is a visible upward trend in the tangential shear, with the cross shear typically hovering around 0.
 
-The Mpc distances are assuming a cluster redshift of z=0.22 {cite:p}`a360_z`.
+The Mpc distances are assuming a cluster redshift of z=0.22 ({cite:p}`a360_z`).
 
 ```{figure} _static/shear-final.png
 :name: shear-final
 
-The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. Both measured profiles have 95% confidence intervals.
+The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. The dotted green line represents a reference NFW model. Error bars are 1 standard error. Detection significance for the tangential and cross shears are 3.73 and 0.02 sigma, respectively.
 ```
 
-The theoretical shear profile is produced using CLMM. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW halo with an estimated cluster mass of 4e14 solar masses ({cite:p}`a360_mass`) and a concentration of 4. The source redshift distribution is based off of the DESC Science Requirements Document (SRD, {cite:p}`desc-srd`) Y10 N(z).
+The theoretical shear profile is produced using CLMM. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW halo with an estimated cluster mass of 6e14 solar masses ({cite:p}`a360_mass`) and a concentration of 3.5. The source redshift distribution is based off of the mean $\beta_s$ statistics described in the photo-z section above.
 
 :::{table} Values of the R components used to calibrate the shape measurements. The values are taken after all cuts are applied to the source galaxy sample.
 :widths: auto
 
 |                   | Galaxies < 0.5 degrees |
 | :---------------- | ---------------------: |
-| R_11              | 0.2101                 |
-| R_22              | 0.1932                 |
-| R_11_err          | 0.000689               |
-| R_22_err          | 0.000704               |
-| \| R_11 - R_22 \| | 0.0169                 |
+| R_11              | 0.6393                 |
+| R_22              | 0.5841                 |
+| R_11_err          | 0.00253                |
+| R_22_err          | 0.00256                |
+| \| R_11 - R_22 \| | 0.0552                 |
 :::
 
 ## Validation & Testing
