@@ -234,19 +234,19 @@ RS galaxies are selected if they satisfy one of the two requirements in all 3 co
 
 Once the RS galaxies are identified, they are removed from the sample of galaxies within 0.5 degrees of the BCG, which the becomes the sample that goes on the further selection cuts.
 
-```{figure} _static/color-magnitude-0-1-orange.png
+```{figure} _static/01-RS-all_cuts.png
 :name: color-magnitude-0-1-orange
 
 Color-magnitude diagram cut to 0.1 degrees within the BCG. Objects that are included within the cut are highlighted in orange.
 ```
 
-```{figure} _static/color-magnitude-0-5-orange.png
+```{figure} _static/05-RS-all_cuts.png
 :name: color-magnitude-0-5-orange
 
 Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are included within the cut are highlighted in orange.
 ```
 
-```{figure} _static/color-magnitude-0-5-removed.png
+```{figure} _static/05-RS-removed.png
 :name: color-magnitude-0-5-removed
 
 Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are included within the cut are removed.
