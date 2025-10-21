@@ -198,7 +198,7 @@ pipetask run -j 4 --register-dataset-types \
 The associated `comcam_pipeline.yaml` file used for defining the tasks is outline below:
 
 ```yaml
-description: Pipeline for running metadetection on DC2
+description: Pipeline for running metadetection on DP1
 instrument: lsst.obs.lsst.LsstComCam
 
 tasks:
