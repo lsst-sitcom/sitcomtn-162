@@ -73,13 +73,13 @@ Metadetection utilizes both inner and outer boundaries of cells. However, the im
 ```{figure} _static/3_band_image_distribution.png
 :name: image_dist
 
-These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the g, r, and i-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though they do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle). Additionally, the 0.3 degree radius (orange circle) contains no missing patches; this radius contains the upper limit of the data used for the shear profile after binning is applied. The colorbar is scaled to the minimum and maximum number of inputs images across the three bands (1 and 16, respectively).
-```
+*These three figures show the input image distribution for the patches, each composed of 484 cells, around A360 in the *g*, *r*, and *i*-bands. The red squares outline the inner patch boundaries, where the 2 cell overlap is visible. The three missing patches are due to processing errors when running Metadetection, though they do not significantly overlap with the 0.5 degree radius around the BCG (cyan circle). Additionally, the 0.3 degree radius (orange circle) contains no missing patches; this radius contains the upper limit of the data used for the final shear profile. The colorbar is scaled to the minimum and maximum number of inputs images across the three bands (1 and 16, respectively).
+*```
 
 ```{figure} _static/3_band_psf_e_distribution.png
 :name: ellip_dist
 
-PSF ellipticity modulus distribution with one PSF realization per cell for the patches around A360 in the *g*, *r*, and *i*-bands. The red squares outline the inner patch boundaries. The *i*-band plot is in good agreement with a similar plot in {cite:p}`SITCOMTN-161`. The mean ellipticities are 0.0563, 0.0689, and 0.0987 for the *g*, *r*, and *i*-bands, respectively. The colorbar is scaled from 0 to the highest value across the 3 bands, which is about 0.255.
+PSF ellipticity modulus distribution with one PSF realization per cell for the patches around A360 in the *g*, *r*, and *i*-bands. The red squares outline the inner patch boundaries. The *i*-band plot is in good agreement with a similar plot in {cite:p}`SITCOMTN-161`. The mean ellipticities are 0.0558, 0.0690, and 0.0980 for the *g*, *r*, and *i*-bands, respectively. The colorbar is scaled from 0 to the highest value across the 3 bands, which is about 0.255.
 ```
 
 Note that for cell-based coadds, there is a single PSF model for each cell, realized at the center of the cell. The distribution of PSF ellipticities are seen in {numref}`ellip_dist`.
@@ -223,21 +223,21 @@ Cluster member galaxies of the lensing cluster structure will not have a lensing
 ```{figure} _static/object-magnitudes.png
 :name: obj-mags
 
-The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after duplicates are removed and Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts. The red vertical lines are the current magnitude cuts at the limiting magnitude, determined by eye. These magnitude cuts are applied after the RS galaxy cut.
+The distribution of object magnitudes, from Metadetection flux measurements, in each of the bands used. This distribution is after duplicates are removed and Metadetection flagged objects are cut, though prior to red sequence galaxy identification and selection cuts. The red vertical lines indicate the limiting magnitude, determined by eye.
 ```
 
 A series of color-magnitude plots with progressive cuts is used to visually identify the red sequence (RS) galaxies. Each cut is applied to the entire catalog, though only the non-sheared catalog is shown in the color-magnitude plots. Previous visual inspection showed that while there is some variation in-between shear type catalogs, the variation is minimal and random enough that applying the same cuts across all catalogs should be sufficient for this analysis.
 
 The catalog is first cut to galaxies less than 0.1 degree away from the BCG to focus on galaxies that are more likely to be cluster members. The red sequence cluster members are identified in a line of objects with relatively consistent color across a range of magnitudes, with the line being more apparent in the smaller sample of galaxies. This line of galaxies is highlighted with orange points, with the upper and lower limits shown in red. The same visual inspection is done again for the larger sample of galaxies, those within 0.5 degrees of the BCG.
 
-RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 2-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `gauss_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `gauss_band_mag_i` < 20) are removed below as described in the selection cut section.
+RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 1-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `gauss_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `gauss_band_mag_i` < 20) are removed below as described in the selection cut section.
 
 Once the RS galaxies are identified, they are removed from the sample of galaxies within 0.5 degrees of the BCG, which the becomes the sample that goes on the further selection cuts.
 
 ```{figure} _static/01-RS-all_cuts.png
 :name: color-magnitude-0-1-orange
 
-Color-magnitude diagram cut to 0.1 degrees within the BCG. Objects that are included within the cut are highlighted in orange.
+Color-magnitude diagram cut to 0.1 degrees within the BCG. Objects that are included within the cut are highlighted in orange. Objects included the cut may fall outside of the original red boundary lines if their error bars intersect with the boundaries. Error bars are not shown for clarity.
 ```
 
 ```{figure} _static/05-RS-all_cuts.png
@@ -283,7 +283,7 @@ As a visual summary of the cuts done to produce the sample, it's helpful to plot
 ```{figure} _static/mag-cut-hist2.png
 :name: mag-cut-hist2
 
-Magnitude distributions of the *i*-band after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described above. Right: The magnitude cut is not applied to show where the SNR cut becomes significant at fainter magnitudes and begins to remove objects. The magnitude cut is instead represented by the vertical line.
+Magnitude distributions of the *i*-band after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described in {numref}'mag_dist_nums'. Right: The magnitude cut is not applied to show where the SNR cut becomes significant at fainter magnitudes and begins to remove objects. The magnitude cut is instead represented by the vertical line.
 ```
 
 :::{table} The number of objects in each of the magnitude histograms in {cite:p}`mag_cut` and the descriptions of the cuts used. While the table {numref}`selection_cuts` shows the total number of rows removed, this table is meant to show the additive effect as each cut is applied. All objects are within 0.5 degrees of the BCG.
@@ -407,7 +407,7 @@ The measured object size compared to the signal-to-noise ratio is a simple cut t
 ```{figure} _static/obj_T_vs_s2n.png
 :name: obj_T_vs_s2n
 
-The relationship between the object size ratio and the S/N of each object before and after selection cuts (both with red sequence galaxies removed). The red line is a visual reference to see what objects are removed by the 1.1 object size ratio cut, though other objects may be removed due to additional cuts. Stars are expected to fall near an object ratio of 1, which is seen clearly for high S/N objects. The remaining objects have the line of stars removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties as seen in {cite:p}`yamamoto`.
+The relationship between the object size ratio and the S/N of each object before and after selection cuts (both with red sequence galaxies removed). The red line is a visual reference to see what objects are removed by the 0.2 object size ratio cut, though other objects may be removed due to additional cuts. Stars are expected to fall near an object ratio of 0, which is seen clearly for high S/N objects in blue. The remaining objects in orange have the line of stars removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties as seen in {cite:p}`yamamoto`. The spurious, high S/N objects that appear in blue are primarily removed with the applied bright object and galactic cirrus masks from (in prep technote).
 ```
 
 ### Object Distributions
