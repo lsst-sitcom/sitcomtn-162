@@ -3,11 +3,9 @@
 ```{abstract}
 (Full author list to be determined)
 
-The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential and cross weak lensing shear profiles of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, and calibrating the shear measurements. Once a shear profile is generated, validation is the bulk of the remaining analysis.
+The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential and cross weak lensing shear profiles of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, calibrating the shear measurements, and validation.
 
-Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is substantial technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed.
-
-As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog. The shear profile performs best in radial bins further away from the cluster center (beyond ~ 2 Mpc), which may be due to high occurances of blending near the cluster center.
+Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is substantial technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed. As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog and resulting reduced shear profile.
 
 This technote is one part of a series studying A360 in order to both stress test the commissioning camera  and demonstrate the technical capabilities of the Vera Rubin Observatory. We study the quality of the PSF modeling and impact it can have on cluster WL in {cite:p}`SITCOMTN-161`, implementation of cell-based coadds and subsequent use for Metadetect {cite:p}`Sheldon_2023` in this technote, photometric calibration in (in prep), source selection and photometric redshifts in {cite:p}`SITCOMTN-163`, use of Anacal {cite:p}`Li_2023` to produce a cluster shear profile in {cite:p}`SITCOMTN-164`, and background subtraction in this field and Fornax in {cite:p}`SITCOMTN-165`.
 ```
@@ -212,13 +210,13 @@ tasks:
                 config.ref_loader.filterMap = {'lsst_'+band: 'monster_ComCam_%s' % (band) for band in 'ugrizy'}
 ```
 
-An important note is that, for this analysis, a single noise image is associated for each cell within Metadetection. A noise image is generated for each warp that is also subjected to the warping process, which is needed to accurately capture correlated noise ({cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`). The noise distribution is randomly pulled from a Gaussian distribution centered at 0 with a variance equal to the median variance of the input image.
+An important note is that, for this analysis, a single noise image is associated for each cell within Metadetection. A noise image is generated for each warp that is also subjected to the warping process, which is needed to accurately capture correlated noise ({cite:p}`Sheldon_2017`, {cite:p}`Sheldon_2020`). The noise distribution is randomly pulled from a Gaussian distribution centered at zero with a variance equal to the median variance of the input image.
 
-After removing duplicated objects from patch overlap, there are a total of 1174579 object rows across the five shear type catalogs. After removing objects flagged by Metadetection (i.e. objects cut due to measurement failures), there are 967436 objects, about 17.6% of the initial catalog. The number of flagged objects is quite high, and requires further investigation.
+The raw catalog immediately after running Metadetection contains 1398239 objects total. After removing objects flagged by Metadetection (i.e. objects cut due to measurement failures), there are 984169 total objects. Removing duplicates from patch overlap reduce the catalog to 805401 objects, and removing duplicates from individual cell overlaps leaves 443,615 objects. The non-sheared sub-catalog is consistently ~20% of the total catalog.
 
 ## Red Sequence Galaxy Identification
 
-Cluster member galaxies of the lensing cluster structure will not have a lensing signal (at least not from the cluster itself). Due to this, these galaxies need to be identified and removed from the lensing sample to avoid diluting the shear signal ({cite:p}`signal_dilution`). These lensing galaxies are primarily identified through visual inspection using color-magnitude plots across three different bands in this technote. Other methods, like photometric redshifts, may also be used, though using only three available bands limits this approach.
+Cluster member galaxies of the lensing cluster structure will not have a lensing signal (at least not from the cluster itself). Due to this, these galaxies need to be identified and removed from the lensing sample to avoid diluting the shear signal ({cite:p}`signal_dilution`). These lensing galaxies are primarily identified through visual inspection using color-magnitude plots across three different bands in this technote. Other methods, like photometric redshifts, may also be used, though using only three available bands limits this approach. The RS identification here is done prior to other cuts to more easily visually identify the red sequence galaxies.
 
 ```{figure} _static/object-magnitudes.png
 :name: obj-mags
@@ -230,9 +228,9 @@ A series of color-magnitude plots with progressive cuts is used to visually iden
 
 The catalog is first cut to galaxies less than 0.1 degree away from the BCG to focus on galaxies that are more likely to be cluster members. The red sequence cluster members are identified in a line of objects with relatively consistent color across a range of magnitudes, with the line being more apparent in the smaller sample of galaxies. This line of galaxies is highlighted with orange points, with the upper and lower limits shown in red. The same visual inspection is done again for the larger sample of galaxies, those within 0.5 degrees of the BCG.
 
-RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 1-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with `gauss_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `gauss_band_mag_i` < 20) are removed below as described in the selection cut section.
+RS galaxies are selected if they satisfy one of the two requirements in all 3 color-magnitude diagrams: the data point falls within the range identified during visual inspection, **or** the 1-$\sigma$ error bars for the color measurement intersect the RS range. The error bar requirement is meant to capture potential RS galaxies that may fall out of the selection region due to noisy measurements, particularly at the fainter end. The RS identification is then also limited to galaxies with 18 < `gauss_band_mag_r` < 24. While RS galaxies may be fainter than this, it becomes more difficult to distinguish between RS and background galaxies. Since unsheared foreground galaxies will dilute the signal, but not bias it, a small contamination is allowed to keep the many source galaxies that may otherwise be cut. Any remaining bright galaxies (those with `gauss_band_mag_r` < 20) are removed below as described in the selection cut section.
 
-Once the RS galaxies are identified, they are removed from the sample of galaxies within 0.5 degrees of the BCG, which the becomes the sample that goes on the further selection cuts.
+The sample of galaxies within 0.5 degrees of the BCG goes on to further selection cuts in the next section, with the identified RS galaxies removed and masks applied. The masks include bright objects, galactic cirrus, SFD dust, and areas with low numbers of exposures. Mask details can be found in (in prep technote). The impact of cuts applied within the 0.5 degree sample are summarized in {numref}`mag_dist_nums`.
 
 ```{figure} _static/01-RS-all_cuts.png
 :name: color-magnitude-0-1-orange
@@ -252,23 +250,17 @@ Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are incl
 Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are included within the cut are removed.
 ```
 
-After applying the 0.5 degree cut, but prior to removing RS objects, there are 595377 object rows. After applying the RS cuts, there are 258449, with 51633 (~20%) of which are the non-sheared catalog.
-
 ## Selection Cuts
 
-After Metadetection flags are applied and red sequence galaxies are identified and removed, additional selection cuts are applied. These cuts are primarily based on {cite:p}`yamamoto`, though are customized in several cases to better fit the data from LSSTComCam. A detailed outline of the cuts used and object removed can be seen in {numref}`selection_cuts`. In numerical terms, the number of objects remaining after selection cuts is 78500, with 15819 (20%) in the non-sheared catalog.
+Once the RS galaxies are removed and masks are applied, additional selection cuts are introduced. These cuts are primarily based on {cite:p}`yamamoto`, though are customized in several cases to better fit the data from LSSTComCam. A detailed outline of the cuts used and object removed can be seen in {numref}`selection_cuts`. The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements and the measurements here, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Based on {numref}`obj_T_vs_s2n`, the stars identified around `gauss_T_ratio` = 0 appear to fall consistently below `gauss_T_ratio` = 0.2. This smaller value is chosen instead of the Yamamoto value for the `gauss_T_ratio` cut of 0.5, since the inclusion of extra galaxies in this weak lensing sample outweighs the potential inclusion of some low S/N stars. Additional differences include the magnitude cut, which is based off of {numref}`mag-cut-hist2`, and the junk cuts and size cuts which are specific to DES and don't seem to appear to affect the final catalog using LSSTComCam data.
 
-The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements and the measurements here, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Based on {numref}`obj_T_vs_s2n`, the stars identified around `gauss_T_ratio` = 0 appear to fall consistently below `gauss_T_ratio` = 0.2. This smaller value is chosen instead for the `gauss_T_ratio` cut, since the inclusion of extra galaxies in the weak lensing sample outweighs the potential inclusion of some low S/N stars.
-
-There are a few additional differences from the {cite:p}`yamamoto` cuts. The magnitude cut is based off of {numref}`mag-cut-hist2` and {cite:p}`SITCOMTN-161`, while the junk cuts and size cuts are specific to DES and don't seem to appear to affect LSSTComCam data. Additionally, masks for bright objects, galactic cirrus, SFD dust, and areas with low numbers of exposures are applied. Mask details can be found in (in prep technote).
-
-:::{table} Each cut applied to the Metadetection catalog after the RS cuts. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
+:::{table} Each cut applied to the Metadetection catalog after the RS cuts and applied masks. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
 :name: selection_cuts
 :widths: auto
 
 | Selection Cut                            | Rows Removed | Fraction Removed |
 | :--------------------------------------- | -----------: | ---------------: |
-| `gauss_T_ratio` > 1.05                   | 76863        | 37.5%            |
+| `gauss_T_ratio` > 0.2                    | 65132        | 31.8%            |
 | `gauss_s2n` > 10                         | 30335        | 14.8%            |
 | `mfrac` < 0.1                            | 0            | 0.0%             |
 | `gauss_band_mag_i` < 23.5                | 74987        | 36.6%            |
@@ -278,33 +270,33 @@ There are a few additional differences from the {cite:p}`yamamoto` cuts. The mag
 | `gauss_color_mag_g-i` (abs. value) < 5   | 574          | 0.3%             |
 :::
 
-As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. While one goal of the magnitude cut is to reduce the impact of the SNR cut (discussed more in the photo-z section), which would align closer to a cut closer to `i_mag` < 24.1, a cut of 24.0 is chosen to be consistent with {cite:p}`SITCOMTN-161`. A description of each label can be found in {numref}`mag_dist_nums`, with the numbers in the non-sheared catalog after each cut is applied. The cuts listed for {numref}`mag-cut-hist2` and {numref}`mag_dist_nums` are not in the same order that the cuts are applied within the shear profile analysis, but are rather used to understand the significance of the SNR cut.
+As a visual summary of the cuts done to produce the sample, it's helpful to plot the distribution of magnitudes, in a similar vein as Figure 2 in {cite:p}`mag_cut`. A description of each label can be found in {numref}`mag_dist_nums`, along with the numbers in the non-sheared catalog after each cut is applied. Some of the selection cuts are separated into their own rows to better capture their individual impact. Of particular note is the `i_mag` cut: while {cite:p}`SITCOMTN-161` uses a cut of 24.0, a smaller cut of 23.5 is chosen to reduce the significance of the SNR cut. We don't want SNR to be a significant cut since the photo-z data used (next section) was trained on the Extended Chandra Deep Field South (ECDFS) data, which has different SNR properties.
 
 ```{figure} _static/mag-cut-hist2.png
 :name: mag-cut-hist2
 
-Magnitude distributions of the *i*-band after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described in {numref}'mag_dist_nums'. Right: The magnitude cut is not applied to show where the SNR cut becomes significant at fainter magnitudes and begins to remove objects. The magnitude cut is instead represented by the vertical line.
+Magnitude distributions of the *i*-band after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described in {numref}'mag_dist_nums'. Right: The magnitude cut is not applied to show where the SNR cut becomes significant at fainter magnitudes and begins to remove a substantial number of objects. The magnitude cut is instead represented by the vertical line.
 ```
 
-:::{table} The number of objects in each of the magnitude histograms in {cite:p}`mag_cut` and the descriptions of the cuts used. While the table {numref}`selection_cuts` shows the total number of rows removed, this table is meant to show the additive effect as each cut is applied. All objects are within 0.5 degrees of the BCG.
+:::{table} The number of objects in each of the magnitude histograms in {cite:p}`mag_cut` and the descriptions of the cuts used. While the table {numref}`selection_cuts` shows the total number of rows removed, this table is meant to show the additive effect as each cut is applied. All objects are within 0.5 degrees of the BCG for consistency, such that the "all detections" and "good detections" rows may have smaller values than seen in previous sections.
 :name: mag_dist_nums
 :widths: auto
 
-| Cut Name             | Description                                         | Rows in non-sheared catalog |
-| :------------------- | :-------------------------------------------------- | --------------------------: |
-| **All detections**   | Detections that have a finite *i*-band magnitude    | 178698                      |
-| **Good detections**  | Flagged and duplicate objects removed               | 54228                       |
-| **Masks**            | Masks are applied                                   | 42806                       |
-| **WL Cuts**          | Selection cuts                                      | 39735                       |
-| **Star-galaxy**      | Size ratio cut to remove stars from the sample      | 25001                       |
-| **Magnitude Cut**    | Magnitude where SNR begins to remove objects        | 18645                       |
-| **SNR Cut**          | Objects with SNR < 10 are removed                   | 18566                       |
-| **RS Cuts**          | Red sequence galaxies are identified and removed    | 17651                       |
+| Cut Name             | Description                                       | Rows in non-sheared catalog (% of total catalog) |
+| :------------------- | :------------------------------------------------ | -----------------------------------------------: |
+| **All detections**   | Detections that have a finite *i*-band magnitude  | 172157 (20.022%)                                 |
+| **Good detections**  | Flagged and duplicate objects removed             |  54228 (20.006%)                                 |
+| **RS Cuts**          | Red sequence galaxies are identified and removed  |  51804 (20.009%)                                 |
+| **Masks**            | Masks are applied                                 |  40949 (20.000%)                                 |
+| **WL Cuts**          | Selection cuts                                    |  38297 (19.999%)                                 |
+| **Star-galaxy**      | Size ratio cut to remove stars from the sample    |  26326 (19.969%)                                 |
+| **Magnitude Cut**    | Magnitude where SNR begins to remove objects      |  18461 (19.978%)                                 |
+| **SNR Cut**          | Objects with SNR < 10 are removed                 |  18385 (19.975%)                                 |
 :::
 
-For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 175383 objects prior to any cuts, and then 12852 objects after all cuts are applied. This is a similar ballpark as the final Metadetect catalog size of 17651, especially considering that the selection and quality cuts of two catalogs differ due to the nature of separate catalogs.
+For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 175383 objects prior to any cuts, and then 12852 objects after all cuts are applied. This is a similar ballpark as the final Metadetect catalog size of 18385, especially considering that the selection and quality cuts of two catalogs differ due to the nature of separate catalogs.
 
-The global source density for Metadetection is 8.14 $\pm$ 0.1 $\text{arcmin}^{-2}$, comparable to the 7-8 $\text{arcmin}^{-2}$ range found using the HSM catalog in {cite:p}`SITCOMTN-161`. The density for the Metadetection catalog does trend a bit higher, towards the range of 8-9 $\text{arcmin}^{-2}$, though this is likely due to the fact that this HSM estimate does not yet account for the area affected by masks.
+The source density across all radial bins for Metadetection is 8.5 $\pm$ 0.1 $\text{arcmin}^{-2}$, with a range of 8-9.4 $\text{arcmin}^{-2}$, as seen in {numref}`galaxy-den-profile`. The density for the Metadetection catalog does trend higher than the HSM catalog, which has a range of 7-8 $\text{arcmin}^{-2}$. This is most likely due to the final sizes of the different catalogs, though it should also be noted that the HSM catalog does not yet incorporate masks, which will affect both the final number count and effective area covered by the catalog.
 
 ```{figure} _static/gal_den_profile.png
 :name: galaxy-den-profile
@@ -316,7 +308,7 @@ The galaxy density within each radial bin used for the shear profile. Error bars
 
 In order to model a shear profile to compare to the observed data, an $N(z)$ estimate will be needed. With the utilities available in the Cluster Lensing Mass Modeling (CLMM) code {cite:p}`clmm`, there is a default source redshift distribution based off of the DESC Science Requirements Document (SRD, {cite:p}`desc-srd`) Y10 N(z). However, this is not very representative of the data that's being used here, which is comparatively much shallower. Instead, the initial photo-z catalog used here is created with DNF ({cite:p}`DNF_pz`) on DP1 data, produced in the same manner as described in {cite:p}`SITCOMTN-163`.
 
-The objects in the Metadetection catalogs are then matched to the objects in the DP1 catalogs by nearest neighbor, based on RA/DEC coordinates and limited to matches within 1 arcsecond. The matching is only needed for the non-sheared catalog, which is the catalog used for the $N(z)$ estimate. Objects are then additionally cut from the matched catalogs if they fall below a redshift estimate of 0.37, based on the cut used in {cite:p}`SITCOMTN-163`. The $N(z)$ generated by the method above is ***not*** used for the shear profile generated by the data, only for the test model used for reference. Future works with Metadetection data should run photo-z algorithms on each of the shear profile catalogs individually to fully capture the additional selection effects within the response.
+The objects in the Metadetection catalogs are then matched to the objects in the DP1 catalogs by nearest neighbor, based on RA/DEC coordinates and limited to matches within 1 arcsecond. The matching is only needed for the non-sheared catalog, which is the catalog used for the $N(z)$ estimate. Objects are then additionally cut from the matched catalogs if they fall below a redshift estimate of 0.37, based on the cut used in {cite:p}`SITCOMTN-163`. The final number in the matched photo-z catalog is 14181 for the non-sheared subset. The $N(z)$ generated by the method above is ***not*** used for the shear profile generated by the data, only for the test model used for reference. Future works with Metadetection data should run photo-z algorithms on each of the shear profile catalogs individually to fully capture the additional selection effects within the response.
 
 Once the matched catalogs are created, and using a standard cosmology ($\Omega_m=0.3$, $h=0.7$), the statistics of the lensing efficiency can be calculated. The CLMM package has tools for calculating these using the photo-z point estimate of each galaxy, with the theory based on {cite:p}`beta_theory`, which will be summarized below.
 
