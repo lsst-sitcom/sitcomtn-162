@@ -1,8 +1,6 @@
 # Testing the implementation of Metadetection and Cell-Based Coadds on Abell 360 LSSTComCam data
 
 ```{abstract}
-(Full author list to be determined)
-
 The purpose of this technote is to test the technical quality of LSSTComCam commissioning data, specifically the Rubin_SV_38_7 field, by utilizing cell-based coadds and Metadetection by measuring the tangential and cross weak lensing shear profiles of the massive cluster Abell 360 (called A360 throughout the technote). The process entails generating the cell-based coadds for Metadetection to run on, identifying and removing cluster member galaxies, applying quality cuts, calibrating the shear measurements, and validation.
 
 Cell-based coadds and Metadetection are both currently in the process of being implemented within the LSST Science Pipelines at the time of this technote. There is substantial technical value in attempting a difficult measurement prior to full implementation. Measuring the tangential shear around A360 will showcase the current abilities of these algorithms, as well as highlight where work is still needed. As seen from the resulting shear profile of A360, the cell-based coadds and Metadetection are able to work in tandem to produce a shear catalog and resulting reduced shear profile.
@@ -417,6 +415,8 @@ Object distributions of the non-sheared catalog at various points during cuts. L
 From what was able to be achieved within this technote, the combination of cell-based coadds and Metadetection have the necessary infrastructure needed to successfully run end-to end within the LSST Science Pipelines ecosystem and produce a shape catalog. With this shape catalog, a tangential shear profile of A360 is detected. This is a significant technical milestone, especially considering that the data for this field is shallow  and has limited band information. Some future validation work could include testing alternative blending algorithms to potentially improve the performance of shear measurements in crowded cluster environments, obtaining PSF measurements for reserved stars to preform a $\rho$-statistics analysis, and SSI analyses such as completion tests. Running Metadetection on additional DP1 fields may also identify edge-cases that were not uncovered within the A360 field.
 
 At this time, the task for running Metadetection is still under development, particularly needing focus in robustness and computing efficiency. It should be noted that many configuration settings are not yet available to the pipeline infrastructure through pipeline `.yaml` files. The main motivation for custom branches was to enable these changes (e.g. changing `wmom` to `gauss`) for testing purposes within this specific use case.
+
+Acknowledgement: We thank Erin Sheldon for his guidance and clarification on Metadetection details and associated outputs. Several details within the technote directly benefit from this improved clarity.
 
 ## References
 
