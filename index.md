@@ -351,8 +351,8 @@ The main assumption is that the weak lensing shear signal is small enough that w
 
 $$
 \begin{align}
-\mathbf{e}&\approx\mathbf{e}|_{\gamma=0}+ \frac{\partial\mathbf{e}}{\partial\mathbf{\gamma}}\bigg\rvert_{\gamma=0} \\
-\mathbf{e}&\approx\cancel{\langle\mathbf{e}\rangle|_{\gamma=0}}+\langle\mathbf{R}\mathbf{\gamma}\rangle \\
+\mathbf{e}&\approx\mathbf{e}|_{\gamma=0}+ \frac{\partial\mathbf{e}}{\partial\mathbf{\gamma}}\bigg\rvert_{\gamma=0}\mathbf{\gamma} \\
+\langle\mathbf{e}\rangle&\approx\cancel{\langle\mathbf{e}\rangle|_{\gamma=0}}+\langle\mathbf{R}\mathbf{\gamma}\rangle \\
 \langle\mathbf{\gamma}\rangle&\approx\langle\mathbf{R}^{-1}\rangle\langle\mathbf{e}\rangle \\
 \langle R_{ij}\rangle&=\frac{\langle e_i^+\rangle-\langle e_i^-\rangle}{\Delta\gamma_j}
 \end{align}
