@@ -252,7 +252,7 @@ Color-magnitude diagram cut to 0.5 degrees within the BCG. Objects that are incl
 
 ## Selection Cuts
 
-Once the RS galaxies are removed and masks are applied, additional selection cuts are introduced. These cuts are primarily based on {cite:p}`yamamoto`, though are customized in several cases to better fit the data from LSSTComCam. A detailed outline of the cuts used and object removed can be seen in {numref}`selection_cuts`. The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements and the measurements here, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Based on {numref}`obj_T_vs_s2n`, the stars identified around `gauss_T_ratio` = 0 appear to fall consistently below `gauss_T_ratio` = 0.2. This smaller value is chosen instead of the Yamamoto value for the `gauss_T_ratio` cut of 0.5, since the inclusion of extra galaxies in this weak lensing sample outweighs the potential inclusion of some low S/N stars and smaller galaxies, particularly in the context of cluster lensing. Additional differences include the magnitude cut, which is based off of {numref}`mag-cut-hist2`, and the junk cuts and size cuts which are specific to DES and don't seem to appear to affect the final catalog using LSSTComCam data.
+Once the RS galaxies are removed and masks are applied, additional selection cuts are introduced. These cuts are primarily based on {cite:p}`yamamoto`, though are customized in several cases to better fit the data from LSSTComCam. A detailed outline of the cuts used and object removed can be seen in {numref}`selection_cuts`. The Yamamoto cuts describe a size ratio cut, defined as the size of the object squared divided by size of the PSF squared, or $T^{gauss}/T^{gauss}_{PSF}$. This is used as a star-galaxy cut. For the Yamamoto measurements and the measurements here, these sizes are measured for the pre-PSF objects, so stars will hover around 0 for this ratio. Some notable differences include the magnitude cut, which is based off of {numref}`mag-cut-hist2`, and the junk cuts and size cuts which are specific to DES and don't seem to appear to affect the final catalog using LSSTComCam data.
 
 :::{table} Each cut applied to the Metadetection catalog after the RS cuts and applied masks. Note that the number of rows removed is for each individual cut, so cuts may overlap with other cuts.
 :name: selection_cuts
@@ -260,7 +260,7 @@ Once the RS galaxies are removed and masks are applied, additional selection cut
 
 | Selection Cut                            | Rows Removed | Fraction Removed |
 | :--------------------------------------- | -----------: | ---------------: |
-| `gauss_T_ratio` > 0.2                    | 65132        | 31.8%            |
+| `gauss_T_ratio` > 0.5                    | 111442       | 54.4%            |
 | `gauss_s2n` > 10                         | 30335        | 14.8%            |
 | `mfrac` < 0.1                            | 0            | 0.0%             |
 | `gauss_band_mag_i` < 23.5                | 74987        | 36.6%            |
@@ -278,7 +278,7 @@ As a visual summary of the cuts done to produce the sample, it's helpful to plot
 Magnitude distributions of the *i*-band after various cuts done to produce the weak lensing sample. Left: All cuts are applied in the order described in Table 2. Right: The magnitude cut is not applied to show where the SNR cut becomes significant at fainter magnitudes and begins to remove a substantial number of objects. The magnitude cut is instead represented by the vertical line.
 ```
 
-:::{table} The number of objects in each of the magnitude histograms in {cite:p}`mag_cut` and the descriptions of the cuts used. While the table {numref}`selection_cuts` shows the total number of rows removed, this table is meant to show the additive effect as each cut is applied. All objects are within 0.5 degrees of the BCG for consistency, such that the "all detections" and "good detections" rows may have smaller values than seen in previous sections.
+:::{table} The number of objects in each of the magnitude histograms in {cite:p}`mag_cut` and the descriptions of the cuts used. While the table {numref}`selection_cuts` shows the total number of rows removed, this table is meant to show the additive effect as each cut is applied. All objects are within 0.5 degrees of the BCG for consistency, such that the "all detections" and "good detections" rows may have smaller values than seen in previous sections. The percentage of the total catalog column is used to show the consistency of the non-sheared catalog size compared to the total catalog, which should be consistent with 20%.
 :name: mag_dist_nums
 :widths: auto
 
@@ -289,14 +289,14 @@ Magnitude distributions of the *i*-band after various cuts done to produce the w
 | **RS Cuts**          | Red sequence galaxies are identified and removed  |  51804 (20.009%)                                 |
 | **Masks**            | Masks are applied                                 |  40949 (20.000%)                                 |
 | **WL Cuts**          | Selection cuts                                    |  38297 (19.999%)                                 |
-| **Star-galaxy**      | Size ratio cut to remove stars from the sample    |  26326 (19.969%)                                 |
-| **Magnitude Cut**    | Magnitude where SNR begins to remove objects      |  18461 (19.978%)                                 |
-| **SNR Cut**          | Objects with SNR < 10 are removed                 |  18385 (19.975%)                                 |
+| **Star-galaxy**      | Size ratio cut to remove stars from the sample    |  17171 (19.993%)                                 |
+| **Magnitude Cut**    | Magnitude where SNR begins to remove objects      |  13190 (19.998%)                                 |
+| **SNR Cut**          | Objects with SNR < 10 are removed                 |  13114 (19.989%)                                 |
 :::
 
-For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 175383 objects prior to any cuts, and then 12852 objects after all cuts are applied. This is a similar ballpark as the final Metadetect catalog size of 18385, especially considering that the selection and quality cuts of two catalogs differ due to the nature of separate catalogs.
+For reference against another catalog, it's useful to look at the number of objects found in the HSM catalog ({cite:p}`HSM1`, {cite:p}`HSM2`) used in {cite:p}`SITCOMTN-161` within the same 0.5 degree radius as used in this technote. The HSM catalog first reads in 175383 objects prior to any cuts, and then 12852 objects after all cuts are applied. This is a similar ballpark as the final Metadetect catalog size of 13114, especially considering that the selection and quality cuts of two catalogs differ due to the nature of separate catalogs.
 
-The source density across all radial bins for Metadetection is 8.5 $\pm$ 0.1 $\text{arcmin}^{-2}$, with a range of 8-9.4 $\text{arcmin}^{-2}$, as seen in {numref}`galaxy-den-profile`. The density for the Metadetection catalog does trend higher than the HSM catalog, which has a range of 7-8 $\text{arcmin}^{-2}$. This is most likely due to the final sizes of the different catalogs, though it should also be noted that the HSM catalog does not yet incorporate masks, which will affect both the final number count and effective area covered by the catalog.
+The source density across all radial bins for Metadetection is 6.1 $\pm$ 0.09 $\text{arcmin}^{-2}$, with the density across individual bins shown in {numref}`galaxy-den-profile`. The density for the Metadetection catalog does trend lower than the HSM catalog, which has a range of 7-8 $\text{arcmin}^{-2}$. This is most likely due to the final sizes of the different catalogs, though it should also be noted that the HSM catalog does not yet incorporate masks, which will affect both the final number count and effective area covered by the catalog.
 
 ```{figure} _static/gal_den_profile.png
 :name: galaxy-den-profile
@@ -308,7 +308,7 @@ The galaxy density within each radial bin used for the shear profile. Error bars
 
 In order to model a shear profile to compare to the observed data, an $N(z)$ estimate will be needed. With the utilities available in the Cluster Lensing Mass Modeling (CLMM) code {cite:p}`clmm`, there is a default source redshift distribution based off of the DESC Science Requirements Document (SRD, {cite:p}`desc-srd`) Y10 N(z). However, this is not very representative of the data that's being used here, which is comparatively much shallower. Instead, the initial photo-z catalog used here is created with DNF ({cite:p}`DNF_pz`) on DP1 data, produced in the same manner as described in {cite:p}`SITCOMTN-163`.
 
-The objects in the Metadetection catalogs are then matched to the objects in the DP1 catalogs by nearest neighbor, based on RA/DEC coordinates and limited to matches within 1 arcsecond. The matching is only needed for the non-sheared catalog, which is the catalog used for the $N(z)$ estimate. Objects are then additionally cut from the matched catalogs if they fall below a redshift estimate of 0.37, based on the cut used in {cite:p}`SITCOMTN-163`. The final number in the matched photo-z catalog is 14181 for the non-sheared subset. The $N(z)$ generated by the method above is ***not*** used for the shear profile generated by the data, only for the test model used for reference. Future works with Metadetection data should run photo-z algorithms on each of the shear profile catalogs individually to fully capture the additional selection effects within the response.
+The objects in the Metadetection catalogs are then matched to the objects in the DP1 catalogs by nearest neighbor, based on RA/DEC coordinates and limited to matches within 1 arcsecond. The matching is only needed for the non-sheared catalog, which is the catalog used for the $N(z)$ estimate. Objects are then additionally cut from the matched catalogs if they fall below a redshift estimate of 0.37, based on the cut used in {cite:p}`SITCOMTN-163`. The final number in the matched photo-z catalog is 9328 for the non-sheared subset. The $N(z)$ generated by the method above is ***not*** used for the shear profile generated by the data, only for the test model used for reference. Future works with Metadetection data should run photo-z algorithms on each of the shear profile catalogs individually to fully capture the additional selection effects within the response.
 
 Once the matched catalogs are created, and using a standard cosmology ($\Omega_m=0.3$, $h=0.7$), the statistics of the lensing efficiency can be calculated. The CLMM package has tools for calculating these using the photo-z point estimate of each galaxy, with the theory based on {cite:p}`beta_theory`, which will be summarized below.
 
@@ -364,28 +364,28 @@ A note on coordinate systems: Both the Metadetection $g_1$ and $g_2$ shapes and 
 
 ### Shear Results
 
-The resulting shear profile is shown below in {numref}`shear-final`. Each bin is calculated from the calibrated shapes of galaxies in five bins that range from 0.71 Mpc to 3.75 Mpc, split evenly in $\log_{10}$ space. The range for the binning is based off of {cite:p}`binning`. The error bars for the bins are 1 standard error (standard deviation / $\sqrt(N)$). From smallest radial separation to largest, the number of galaxies in each bin are 245, 433, 974, 1810, and 3119 galaxies. Despite shear around clusters typically being fairly noisy, there is a visible upward trend in the tangential shear, with the cross shear typically hovering around 0.
+The resulting shear profile is shown below in {numref}`shear-final`. Each bin is calculated from the calibrated shapes of galaxies in five bins that range from 0.71 Mpc to 3.75 Mpc, split evenly in $\log_{10}$ space. The range for the binning is based off of {cite:p}`binning`. The error bars for the bins are 1 standard error (standard deviation / $\sqrt(N)$). From smallest radial separation to largest, the number of galaxies in each bin are 175, 320, 691, 1326, and 2216 galaxies. Despite shear around clusters typically being fairly noisy, there is a visible upward trend in the tangential shear, with the cross shear typically hovering around 0.
 
 The Mpc distances are assuming a cluster redshift of z=0.22 ({cite:p}`a360_z`).
 
 ```{figure} _static/shear-final.png
 :name: shear-final
 
-The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. The dotted green line represents a reference NFW model. Error bars are 1 standard error. Detection significance for the tangential and cross shears are 3.73 and 0.02 sigma, respectively.
+The reduced shear profile around A360 for both tangential and cross shear measurements, using the cuts described throughout the technote. The dotted green line represents a reference NFW model. Error bars are 1 standard error. Detection significance for the tangential and cross shears are 3.70 and 0.39 sigma, respectively.
 ```
 
 The theoretical shear profile is produced using CLMM. This profile is purely for a rough reference, and is not fit to the calibrated shear data. The profile is using an NFW halo with an estimated cluster mass of 6e14 solar masses ({cite:p}`a360_mass`) and a concentration of 3.5. The source redshift distribution is based off of the mean $\beta_s$ statistics described in the photo-z section above.
 
-:::{table} Values of the R components used to calibrate the shape measurements. The values are taken after all cuts are applied to the source galaxy sample.
+:::{table} Values of the R components used to calibrate the shape measurements. The values are taken after all cuts are applied to the source galaxy sample. The errors are 1 standard deviation.
 :widths: auto
 
 |                   | Galaxies < 0.5 degrees |
 | :---------------- | ---------------------: |
-| R_11              | 0.6393                 |
-| R_22              | 0.5841                 |
-| R_11_err          | 0.00253                |
-| R_22_err          | 0.00256                |
-| \| R_11 - R_22 \| | 0.0552                 |
+| R_11              | 0.6785                 |
+| R_22              | 0.6737                 |
+| R_11_err          | 0.00330                |
+| R_22_err          | 0.00333                |
+| \| R_11 - R_22 \| | 0.0048                 |
 :::
 
 ## Validation & Testing
@@ -399,7 +399,7 @@ The measured object size compared to the signal-to-noise ratio is a simple cut t
 ```{figure} _static/obj_T_vs_s2n.png
 :name: obj_T_vs_s2n
 
-The relationship between the object size ratio and the S/N of each object before and after selection cuts (both with red sequence galaxies removed). The red line is a visual reference to see what objects are removed by the 0.2 object size ratio cut, though other objects may be removed due to additional cuts. Stars are expected to fall near an object ratio of 0, which is seen clearly for high S/N objects in blue. The remaining objects in orange have the line of stars removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties as seen in {cite:p}`yamamoto`. The spurious, high S/N objects that appear in blue are primarily removed with the applied bright object and galactic cirrus masks from (in prep technote).
+The relationship between the object size ratio and the S/N of each object before and after selection cuts (both with red sequence galaxies removed). The red line is a visual reference to see what objects are removed by the 0.5 object size ratio cut, though other objects may be removed due to additional cuts. Stars are expected to fall near an object ratio of 0, which is seen clearly for high S/N objects in blue. The remaining objects in orange have the line of stars removed, though some low S/N stars may survive the cut, as those tend to have higher size uncertainties as seen in {cite:p}`yamamoto`. The spurious, high S/N objects that appear in blue are primarily removed with the applied bright object and galactic cirrus masks from (in prep technote).
 ```
 
 ### Object Distributions
